@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { FindFilesTool, RunInTerminalTool, TabCountTool } from './tools';
+import { registerScraper } from './scraper';
 
 export function activate(context: vscode.ExtensionContext) {
     registerChatTool(context);
     registerChatParticipant(context);
+	registerScraper(context);
 }
 
 function registerChatTool(context: vscode.ExtensionContext) {

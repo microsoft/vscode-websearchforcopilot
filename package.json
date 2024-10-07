@@ -15,6 +15,12 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command":"vscode-websearchparticipant.scrape",
+        "title": "Scrape"
+      }
+    ],
     "chatParticipants": [
         {
             "id": "vscode-websearchparticipant.tools",
