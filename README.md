@@ -1,14 +1,9 @@
-# Project
+## Running the Sample
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
-
-As the maintainer of this project, please make a few updates:
-
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+- Run `npm install` in terminal to install dependencies
+- Run the `Run Extension` target in the Debug View. This will:
+	- Start a task `npm: watch` to compile the code
+	- Run the extension in a new VS Code window
 
 ## Contributing
 

@@ -10,13 +10,92 @@
     "Other"
   ],
   "activationEvents": [],
+  "enabledApiProposals": [
+      "lmTools"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "vscode-websearchparticipant.helloWorld",
-        "title": "Hello World"
-      }
+    "chatParticipants": [
+        {
+            "id": "vscode-websearchparticipant.tools",
+            "fullName": "Tool User",
+            "name": "tools",
+            "description": "I use tools",
+            "isSticky": true,
+            "supportsToolReferences": true
+        }
+    ],
+    "languageModelTools": [
+        {
+            "id": "vscode-websearchparticipant_tabCount",
+            "tags": ["editors", "vscode-websearchparticipant"],
+            "name": "tabCount",
+            "displayName": "Tab Count",
+            "modelDescription": "The number of active tabs in a tab group",
+            "icon": "$(files)",
+            "canBeInvokedManually": true,
+            "parametersSchema": {
+                "type": "object",
+                "properties": {
+                    "tabGroup": {
+                        "type": "number",
+                        "description": "The index of the tab group to check. This is optional- if not specified, the active tab group will be checked.",
+                        "default": 0
+                    }
+                }
+            },
+            "supportedContentTypes": [
+                "text/plain"
+            ]
+        },
+        {
+            "id": "vscode-websearchparticipant_findFiles",
+            "tags": [
+                "files",
+                "search",
+                "vscode-websearchparticipant"
+            ],
+            "displayName": "Find Files",
+            "modelDescription": "Search for files in the current workspace",
+            "parametersSchema": {
+                "type": "object",
+                "properties": {
+                    "pattern": {
+                        "type": "string",
+                        "description": "Search for files that match this glob pattern"
+                    }
+                },
+                "required": ["pattern"]
+            },
+            "supportedContentTypes": [
+                "text/plain"
+            ]
+        },
+        {
+            "id": "vscode-websearchparticipant_runInTerminal",
+            "tags": [
+                "terminal",
+                "vscode-websearchparticipant"
+            ],
+            "displayName": "Run in Terminal",
+            "modelDescription": "Run a command in a terminal and return the output",
+            "parametersSchema": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The command to run"
+                    }
+                },
+                "required": [
+                    "command"
+                ]
+            },
+            "supportedContentTypes": [
+                "text/plain"
+            ],
+            "requiresConfirmation": true
+        }
     ]
   },
   "scripts": {
