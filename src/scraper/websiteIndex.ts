@@ -21,7 +21,7 @@ export class WebsiteIndex implements IWebsiteIndex {
         this._loadPromise = this._load();
     }
 
-    async search(query: string, maxResults: number, token: CancellationToken): Promise<IWebChunk[]> {
+    async search(query: string, maxResults: number): Promise<IWebChunk[]> {
         const tfidf = await this._loadPromise;
         const score = tfidf.search([query], maxResults);
         return score;

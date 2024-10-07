@@ -1,5 +1,5 @@
 import { WebsiteIndex } from "./websiteIndex";
-import { commands, ExtensionContext, window } from "vscode";
+import {  commands, ExtensionContext, window } from "vscode";
 
 export function registerScraper(context: ExtensionContext) {
     
@@ -13,10 +13,23 @@ export function registerScraper(context: ExtensionContext) {
                 return undefined;
             }
         });
-        if (!url) {
+        
+        const query = await window.showInputBox({
+            placeHolder: 'Query to drive chunks'
+        });
+
+        if (!url || !query) {
             return;
         }
-        const index = new WebsiteIndex(url);
-        console.log('here');
+
+        const resultChunks = findChunks(url,query);
+        console.log(resultChunks);
     }));
+}
+
+// todo: ideally, the index persists across queries.
+async function findChunks(url: string, query: string) {
+    const index = new WebsiteIndex(url);
+
+    return await index.search(query, 5);
 }

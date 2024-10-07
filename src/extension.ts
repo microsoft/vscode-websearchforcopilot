@@ -1,28 +1,11 @@
 import * as vscode from 'vscode';
 import { FindFilesTool, RunInTerminalTool, TabCountTool } from './tools';
-import { registerScraper } from './scraper/scraper';
+import { registerScraper } from './scraper/registerScraper';
 
 export function activate(context: vscode.ExtensionContext) {
     registerChatTool(context);
     registerChatParticipant(context);
 	registerScraper(context);
-
-    // context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrape', async () => {
-    //     // const url = await vscode.window.showInputBox({
-    //     //     placeHolder: 'Website URL... (ex: https://tree-sitter.github.io/tree-sitter)',
-    //     //     validateInput(value: string) {
-    //     //         if (!URL.canParse(value)) {
-    //     //             return 'Not a valid URL';
-    //     //         }
-    //     //         return undefined;
-    //     //     }
-    //     // });
-    //     // if (!url) {
-    //     //     return;
-    //     // }
-    //     // const index = new WebsiteIndex(url);
-    //     console.log('here');
-    // }));
 }
 
 function registerChatTool(context: vscode.ExtensionContext) {
