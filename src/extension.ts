@@ -19,7 +19,11 @@ function registerAuthProvider(context: vscode.ExtensionContext) {
         { supportsMultipleAccounts: true }
     ));
     context.subscriptions.push(vscode.commands.registerCommand('tavily-authentication-provider.hi', async () => {
-        await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
+        const session = await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
+        const choice = await vscode.window.showInformationMessage(`Hi 👋 Here's the API key for '${session.account.label}'!`, 'Copy API key');
+        if (choice) {
+            await vscode.env.clipboard.writeText(session.accessToken);
+        }
     }));
 }
 
