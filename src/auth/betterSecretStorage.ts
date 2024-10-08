@@ -231,7 +231,7 @@ export class BetterTokenStorage<T> {
 				err => {
 					console.error(err);
 					resolve(tokens);
-				}).then(resolve, err => {
+				}).then(() => resolve(tokens), err => {
 					console.error(err);
 					resolve(tokens);
 				});

@@ -31,6 +31,10 @@
         "title": "Scrape and Open Info As Document"
       },
       {
+        "command":"vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",
+        "title": "Tavily Scrape and Open Info As Document"
+      },
+      {
         "title": "Hi",
         "command": "tavily-authentication-provider.hi",
         "category": "Tavily"

@@ -2,8 +2,45 @@ import { Page, Section } from "./webCrawler";
 import { WebsiteIndex } from "./websiteIndex";
 import * as vscode from 'vscode';
 
-export function registerScraper(context: vscode.ExtensionContext) {
+export function registerTavilyExtractor(context: vscode.ExtensionContext) {
     
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument', async () => {
+
+        const url = await promptForURL();
+        if (!url) {
+            return;
+        }
+
+        const session = await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
+
+        
+        const req = await fetch('https://api.tavily.com/extract', {
+            method: 'POST',
+            headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                urls: [url],
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                api_key: session.accessToken,
+            }),
+        });
+
+			const res = await req.json() as TavilyExtractResult;
+            if (res.results.length === 0) {
+                throw Error('Extraction Failed');
+            }
+        
+            await vscode.workspace.openTextDocument({
+                language: 'markdown', // Specify the language mode
+                content: `${res.results[0].url}\n\n${res.results[0].raw_content}`,
+              });
+    }));
+}
+
+export function registerScraper(context: vscode.ExtensionContext) {
+    registerTavilyExtractor(context);
     context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetChunks', async () => {
 
         const url = await promptForURL();
@@ -38,7 +75,12 @@ export function registerScraper(context: vscode.ExtensionContext) {
     }));
 }
 
-async function promptForURL() {
+interface TavilyExtractResult {
+    results: {url: string, raw_content:string}[];
+    failed_results: any[];
+    response_time: number;
+}
+export async function promptForURL() {
     return await vscode.window.showInputBox({
         placeHolder: 'Website URL... (ex: https://tree-sitter.github.io/tree-sitter)',
         validateInput(value: string) {
