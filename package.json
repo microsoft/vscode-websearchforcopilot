@@ -17,8 +17,12 @@
   "contributes": {
     "commands": [
       {
-        "command":"vscode-websearchparticipant.scrape",
-        "title": "Scrape"
+        "command":"vscode-websearchparticipant.scrapeAndGetChunks",
+        "title": "Scrape and Print Related Chunks"
+      },
+      {
+        "command":"vscode-websearchparticipant.scrapeAndOpenWholeDocument",
+        "title": "Scrape and Open Info As Document"
       }
     ],
     "chatParticipants": [

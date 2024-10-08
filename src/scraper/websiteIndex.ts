@@ -55,7 +55,7 @@ export class WebsiteIndex implements IWebsiteIndex {
             const vscodeUri = Uri.parse(page.url);
             const sections = new Array<IWebChunk>();
             for (const section of page.sections) {
-                const chunk: IWebChunk & { heading: string } = {
+                const chunk: IWebChunk = {
                     file: vscodeUri,
                     text: section.content,
                     heading: section.heading
@@ -70,6 +70,22 @@ export class WebsiteIndex implements IWebsiteIndex {
         }
         tfidf.addOrUpdate(tfidfDocs);
         return tfidf;
+    }
+
+    public async getAllChunks(): Promise<Page[]> {
+        const tfidf = await this._loadPromise;
+        const pages: Page[] = [];
+
+        for (const [uri, value] of tfidf.documents) {
+            pages.push({
+                url: uri.toString(),
+                sections: value.chunks.map(chunk => ({
+                    heading: chunk.heading,
+                    content: chunk.text
+                }))
+            });
+        }
+        return pages;
     }
 
     private _loadFromCache():Page[] | undefined {

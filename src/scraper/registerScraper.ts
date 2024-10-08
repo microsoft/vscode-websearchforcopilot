@@ -1,35 +1,75 @@
+import { Page } from "./webCrawler";
 import { WebsiteIndex } from "./websiteIndex";
-import {  commands, ExtensionContext, window } from "vscode";
+import * as vscode from 'vscode';
 
-export function registerScraper(context: ExtensionContext) {
+export function registerScraper(context: vscode.ExtensionContext) {
     
-    context.subscriptions.push(commands.registerCommand('vscode-websearchparticipant.scrape', async () => {
-        const url = await window.showInputBox({
-            placeHolder: 'Website URL... (ex: https://tree-sitter.github.io/tree-sitter)',
-            validateInput(value: string) {
-                if (!URL.canParse(value)) {
-                    return 'Not a valid URL';
-                }
-                return undefined;
-            }
-        });
-        
-        const query = await window.showInputBox({
-            placeHolder: 'Query to drive chunks'
-        });
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetChunks', async () => {
 
-        if (!url || !query) {
+        const url = await promptForURL();
+        if (!url) {
             return;
         }
 
-        const resultChunks = findChunks(url,query);
+        const resultChunks = await findChunksBasedOnQuery(url);
         console.log(resultChunks);
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndOpenWholeDocument', async () => {
+        const url = await promptForURL();
+        if (!url) {
+            return;
+        }
+
+        await getAllPageContent(url);
     }));
 }
 
+async function promptForURL() {
+    return await vscode.window.showInputBox({
+        placeHolder: 'Website URL... (ex: https://tree-sitter.github.io/tree-sitter)',
+        validateInput(value: string) {
+            if (!URL.canParse(value)) {
+                return 'Not a valid URL';
+            }
+            return undefined;
+        }
+    });
+}
 // todo: ideally, the index persists across queries.
-async function findChunks(url: string, query: string) {
+async function findChunksBasedOnQuery(url: string) {
+    const query = await vscode.window.showInputBox({
+        placeHolder: 'Query to drive chunks'
+    });
+
+    if ( !query) {
+        return;
+    }
     const index = new WebsiteIndex(url);
 
     return await index.search(query, 5);
+}
+
+async function getAllPageContent(url: string) {
+    const index = new WebsiteIndex(url);
+    const pages = await index.getAllChunks();
+
+    for (const page of pages) {
+        await vscode.workspace.openTextDocument({
+            language: 'markdown', // Specify the language mode
+            content: getDocumentFromPage(page),
+          });
+    }
+}
+
+ function getDocumentFromPage(page: Page):string {
+    const strBuffer:string[] = [page.url, ''];
+
+    for(const p of page.sections) {
+        strBuffer.push(`# ${p.heading}`);
+        strBuffer.push(p.content);
+        strBuffer.push(`\n`);
+    }
+
+    return strBuffer.join('\n');
 }

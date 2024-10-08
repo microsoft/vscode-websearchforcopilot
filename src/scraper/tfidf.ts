@@ -115,7 +115,7 @@ export class TfIdf<T extends FileChunk> {
 
 	private readonly chunkOccurrences: DocumentOccurrences = new Map</* word */ string, /*documentOccurrences*/ number>();
 
-	private readonly documents = new ResourceMap<{
+	 readonly documents = new ResourceMap<{
 		readonly chunks: ReadonlyArray<T & DocumentChunkEntry>;
 	}>();
 
