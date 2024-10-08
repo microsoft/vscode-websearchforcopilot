@@ -24,11 +24,15 @@
     "commands": [
       {
         "command":"vscode-websearchparticipant.scrapeAndGetChunks",
-        "title": "Scrape and Print Related Chunks"
+        "title": "Scrape and Show Related TF-IDF Chunks"
       },
       {
         "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunks",
-        "title": "Scrape and Print Related Naive Chunks"
+        "title": "Scrape and Show Related TF-IDF Naive Chunks"
+      },
+      {
+        "command":"vscode-websearchparticipant.tavilyScrapeAndGetChunks",
+        "title": "Scrape and Show Related Tavily Chunks"
       },
       {
         "command":"vscode-websearchparticipant.scrapeAndOpenWholeDocument",
@@ -36,7 +40,7 @@
       },
       {
         "command":"vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",
-        "title": "Tavily Scrape and Open Info As Document"
+        "title": "Tavily Extract and Open Info As Document"
       },
       {
         "title": "Hi",

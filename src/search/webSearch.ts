@@ -55,6 +55,17 @@ interface IWebSearchParameters {
     urls?: string[];
 }
 
+interface IExtractParameters {
+    api_key: string;
+    urls: string[];
+}
+
+interface IExtractResponse {
+    results: {url: string, raw_content:string}[];
+    failed_results: any[];
+    response_time: number;
+}
+
 export function registerWebSearch(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.search', async () => {
         const auth = await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
@@ -111,5 +122,20 @@ export class WebSearchTool implements vscode.LanguageModelTool<IWebSearchParamet
         });
 
         return response.json();
+    }
+
+    static async extract(params:IExtractParameters): Promise<IExtractResponse> {
+        const req = await fetch(API_BASE_URL+'/extract', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                urls: params.urls,
+                api_key: params.api_key,
+            }),
+        });
+
+		return await req.json() as IExtractResponse;
     }
 }
