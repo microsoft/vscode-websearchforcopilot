@@ -3,12 +3,14 @@ import { FindFilesTool, RunInTerminalTool, TabCountTool } from './tools';
 import { registerScraper } from './scraper/registerScraper';
 import { TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';
+import { registerWebSearch, WebSearchTool } from './search/webSearch';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProvider(context);
     registerChatTool(context);
     registerChatParticipant(context);
-	registerScraper(context);
+    registerScraper(context);
+    registerWebSearch(context);
 }
 
 function registerAuthProvider(context: vscode.ExtensionContext) {
@@ -31,6 +33,7 @@ function registerChatTool(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_tabCount', new TabCountTool()));
     context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_findFiles', new FindFilesTool()));
     context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_runInTerminal', new RunInTerminalTool()));
+    context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_tools', new WebSearchTool()));
 }
 
 interface IToolCall {
@@ -39,9 +42,9 @@ interface IToolCall {
     result: Thenable<vscode.LanguageModelToolResult>;
 }
 
-const llmInstructions = `Instructions: 
-- The user will ask a question, or ask you to perform a task, and it may require lots of research to answer correctly. There is a selection of tools that let you perform actions or retrieve helpful context to answer the user's question. 
-- If you aren't sure which tool is relevant, you can call multiple tools. You can call tools repeatedly to take actions or gather as much context as needed until you have completed the task fully. Don't give up unless you are sure the request cannot be fulfilled with the tools you have. 
+const llmInstructions = `Instructions:
+- The user will ask a question, or ask you to perform a task, and it may require lots of research to answer correctly. There is a selection of tools that let you perform actions or retrieve helpful context to answer the user's question.
+- If you aren't sure which tool is relevant, you can call multiple tools. You can call tools repeatedly to take actions or gather as much context as needed until you have completed the task fully. Don't give up unless you are sure the request cannot be fulfilled with the tools you have.
 - Don't make assumptions about the situation- gather context first, then perform the task or answer the question.
 - Don't ask the user for confirmation to use tools, just use them.
 - After editing a file, DO NOT show the user a codeblock with the edit or new file contents. Assume that the user can see the result.`;

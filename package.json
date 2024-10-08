@@ -38,6 +38,11 @@
         "title": "Hi",
         "command": "tavily-authentication-provider.hi",
         "category": "Tavily"
+      },
+      {
+        "title": "Search",
+        "command": "vscode-websearchparticipant.search",
+        "category": "Web Search"
       }
     ],
     "chatParticipants": [

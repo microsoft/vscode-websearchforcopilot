@@ -116,8 +116,7 @@ async function waitForShellIntegration(
 	await p;
 }
 
-export class RunInTerminalTool
-	implements vscode.LanguageModelTool<IRunInTerminalParameters>
+export class RunInTerminalTool implements vscode.LanguageModelTool<IRunInTerminalParameters>
 {
 	async invoke(
 		options: vscode.LanguageModelToolInvocationOptions<IRunInTerminalParameters>,
