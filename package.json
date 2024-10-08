@@ -47,10 +47,10 @@
     ],
     "chatParticipants": [
         {
-            "id": "vscode-websearchparticipant.tools",
-            "fullName": "Tool User",
-            "name": "tools",
-            "description": "I use tools",
+            "id": "vscode-websearchparticipant.websearch",
+            "fullName": "Web Search",
+            "name": "websearch",
+            "description": "Search the web for relevant up-to-date information",
             "isSticky": true,
             "supportsToolReferences": true
         }
