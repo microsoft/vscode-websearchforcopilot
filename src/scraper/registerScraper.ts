@@ -1,4 +1,4 @@
-import { Page } from "./webCrawler";
+import { Page, Section } from "./webCrawler";
 import { WebsiteIndex } from "./websiteIndex";
 import * as vscode from 'vscode';
 
@@ -12,6 +12,19 @@ export function registerScraper(context: vscode.ExtensionContext) {
         }
 
         const resultChunks = await findChunksBasedOnQuery(url);
+        
+        await vscode.workspace.openTextDocument({
+            language: 'markdown', // Specify the language mode
+            content: resultChunks?.flatMap(c => [
+                '',
+                ...sectionToString({    
+                    heading: c.heading,
+                    content: c.text}
+                ),
+                '',
+                '-------------------',
+            ]).join('\n'),
+          });
         console.log(resultChunks);
     }));
 
@@ -62,14 +75,21 @@ async function getAllPageContent(url: string) {
     }
 }
 
- function getDocumentFromPage(page: Page):string {
+function getDocumentFromPage(page: Page):string {
     const strBuffer:string[] = [page.url, ''];
 
     for(const p of page.sections) {
-        strBuffer.push(`# ${p.heading}`);
-        strBuffer.push(p.content);
-        strBuffer.push(`\n`);
+        strBuffer.push(...sectionToString(p));
     }
 
     return strBuffer.join('\n');
+}
+
+function sectionToString(section: Section): string[] {
+    const strBuffer:string[] = [];
+    strBuffer.push(`# ${section.heading}`);
+    strBuffer.push(section.content);
+    strBuffer.push(`\n`);
+    return strBuffer;
+
 }
