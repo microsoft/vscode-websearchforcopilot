@@ -1,5 +1,4 @@
-import { Page, Section } from "./webCrawler";
-import { WebsiteIndex } from "./websiteIndex";
+import { getDocumentFromPage, WebsiteIndex,sectionToString, WebsiteNaiveChunkIndex } from "./websiteIndex";
 import * as vscode from 'vscode';
 
 export function registerTavilyExtractor(context: vscode.ExtensionContext) {
@@ -73,6 +72,28 @@ export function registerScraper(context: vscode.ExtensionContext) {
 
         await getAllPageContent(url);
     }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetNaiveChunks', async () => {
+
+        const url = await promptForURL();
+        if (!url) {
+            return;
+        }
+
+        const resultChunks = await findNaiveChunksBasedOnQuery(url);
+        
+        await vscode.workspace.openTextDocument({
+            language: 'markdown', // Specify the language mode
+            content: resultChunks?.flatMap(c => [
+                '',
+                c.text,
+                '',
+                '-------------------',
+            ]).join('\n'),
+          });
+        console.log(resultChunks);
+    }));
+
 }
 
 interface TavilyExtractResult {
@@ -80,6 +101,7 @@ interface TavilyExtractResult {
     failed_results: any[];
     response_time: number;
 }
+
 export async function promptForURL() {
     return await vscode.window.showInputBox({
         placeHolder: 'Website URL... (ex: https://tree-sitter.github.io/tree-sitter)',
@@ -100,7 +122,22 @@ async function findChunksBasedOnQuery(url: string) {
     if ( !query) {
         return;
     }
+    
     const index = new WebsiteIndex(url);
+
+    return await index.search(query, 5);
+}
+
+async function findNaiveChunksBasedOnQuery(url: string) {
+    const query = await vscode.window.showInputBox({
+        placeHolder: 'Query to drive chunks'
+    });
+
+    if (!query) {
+        return;
+    }
+    
+    const index = new WebsiteNaiveChunkIndex(url);
 
     return await index.search(query, 5);
 }
@@ -115,23 +152,4 @@ async function getAllPageContent(url: string) {
             content: getDocumentFromPage(page),
           });
     }
-}
-
-function getDocumentFromPage(page: Page):string {
-    const strBuffer:string[] = [page.url, ''];
-
-    for(const p of page.sections) {
-        strBuffer.push(...sectionToString(p));
-    }
-
-    return strBuffer.join('\n');
-}
-
-function sectionToString(section: Section): string[] {
-    const strBuffer:string[] = [];
-    strBuffer.push(`# ${section.heading}`);
-    strBuffer.push(section.content);
-    strBuffer.push(`\n`);
-    return strBuffer;
-
 }

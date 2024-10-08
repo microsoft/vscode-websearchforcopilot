@@ -27,6 +27,10 @@
         "title": "Scrape and Print Related Chunks"
       },
       {
+        "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunks",
+        "title": "Scrape and Print Related Naive Chunks"
+      },
+      {
         "command":"vscode-websearchparticipant.scrapeAndOpenWholeDocument",
         "title": "Scrape and Open Info As Document"
       },
