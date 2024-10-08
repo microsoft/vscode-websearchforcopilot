@@ -1,6 +1,9 @@
 # docs
+- https://www.microsoft.com/en-us/bing/apis/pricing
+- https://learn.microsoft.com/en-us/bing/search-apis/bing-entity-search/reference/response-objects
 
 ## SearchResponse object
+- https://learn.microsoft.com/en-us/bing/search-apis/bing-entity-search/reference/response-objects#searchresponse
 | Name              | Value                                                                         | Type                  |
 |-------------------|-------------------------------------------------------------------------------|-----------------------|
 | _type             | Type hint, which is set to SearchResponse.                                    | String                |
@@ -20,6 +23,7 @@
 
 
 ## RankingItem object
+- https://learn.microsoft.com/en-us/bing/search-apis/bing-entity-search/reference/response-objects#rankingitem
 | Name        | Value                                                                               | Type          |
 |-------------|-------------------------------------------------------------------------------------|---------------|
 | answerType  | The answer that contains the item to display. For example, News. Use the type to    | String        |
