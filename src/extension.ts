@@ -1,11 +1,26 @@
 import * as vscode from 'vscode';
 import { FindFilesTool, RunInTerminalTool, TabCountTool } from './tools';
 import { registerScraper } from './scraper/registerScraper';
+import { TavilyAuthProvider } from './auth/authProvider';
+import { BetterTokenStorage } from './auth/betterSecretStorage';
 
 export function activate(context: vscode.ExtensionContext) {
+    registerAuthProvider(context);
     registerChatTool(context);
     registerChatParticipant(context);
 	registerScraper(context);
+}
+
+function registerAuthProvider(context: vscode.ExtensionContext) {
+    context.subscriptions.push(vscode.authentication.registerAuthenticationProvider(
+        TavilyAuthProvider.id,
+        'Tavily',
+        new TavilyAuthProvider(new BetterTokenStorage('tavily.keylist', context)),
+        { supportsMultipleAccounts: true }
+    ));
+    context.subscriptions.push(vscode.commands.registerCommand('tavily-authentication-provider.hi', async () => {
+        await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
+    }));
 }
 
 function registerChatTool(context: vscode.ExtensionContext) {

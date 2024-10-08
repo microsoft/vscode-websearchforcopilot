@@ -15,6 +15,12 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "authentication": [
+        {
+            "id": "tavily",
+            "label": "Tavily"
+        }
+    ],
     "commands": [
       {
         "command":"vscode-websearchparticipant.scrapeAndGetChunks",
@@ -23,6 +29,11 @@
       {
         "command":"vscode-websearchparticipant.scrapeAndOpenWholeDocument",
         "title": "Scrape and Open Info As Document"
+      },
+      {
+        "title": "Hi",
+        "command": "tavily-authentication-provider.hi",
+        "category": "Tavily"
       }
     ],
     "chatParticipants": [
