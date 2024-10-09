@@ -10,6 +10,43 @@ export interface Section {
     content: string;
 }
 
+function parse(url: string, document: Document): Page {
+    // Result for the current page
+    const page: Page = {
+        url,
+        sections: [],
+    };
+
+    // Extract the sections from the current page
+    const sections: Section[] = [];
+    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    let currentHeading: string | null = null;
+    let currentContent: string = '';
+    for (const heading of headings) {
+        if (currentHeading) {
+            sections.push({
+                heading: currentHeading,
+                content: currentContent.trim(),
+            });
+            currentContent = '';
+        }
+        currentHeading = heading.textContent;
+        let nextElement = heading.nextElementSibling;
+        while (nextElement && !nextElement.tagName.startsWith('H')) {
+            currentContent += nextElement.textContent;
+            nextElement = nextElement.nextElementSibling;
+        }
+    }
+    if (currentHeading) {
+        sections.push({
+            heading: currentHeading,
+            content: currentContent.trim(),
+        });
+    }
+    page.sections = sections;
+    return page;
+}
+
 async function recursiveCrawl(url: string, seen: Set<string>): Promise<Page[]> {
     const pages: Page[] = [];
 
@@ -26,38 +63,7 @@ async function recursiveCrawl(url: string, seen: Set<string>): Promise<Page[]> {
         const { document } = dom.window;
 
         // Result for the current page
-        const page: Page = {
-            url,
-            sections: [],
-        };
-
-        // Extract the sections from the current page
-        const sections: Section[] = [];
-        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        let currentHeading: string | null = null;
-        let currentContent: string = '';
-        for (const heading of headings) {
-            if (currentHeading) {
-                sections.push({
-                    heading: currentHeading,
-                    content: currentContent.trim(),
-                });
-                currentContent = '';
-            }
-            currentHeading = heading.textContent;
-            let nextElement = heading.nextElementSibling;
-            while (nextElement && !nextElement.tagName.startsWith('H')) {
-                currentContent += nextElement.textContent;
-                nextElement = nextElement.nextElementSibling;
-            }
-        }
-        if (currentHeading) {
-            sections.push({
-                heading: currentHeading,
-                content: currentContent.trim(),
-            });
-        }
-        page.sections = sections;
+        const page = parse(url, document);
         pages.push(page);
 
         // Recurse into child pages
@@ -86,4 +92,14 @@ async function recursiveCrawl(url: string, seen: Set<string>): Promise<Page[]> {
 export function crawl(url: string) {
     const seenUrls = new Set<string>();
     return recursiveCrawl(url, seenUrls);
+}
+
+export async function scrape(url: string) {
+    const response = await fetch(url);
+    const html = await response.text();
+    const dom = new JSDOM(html);
+    const { document } = dom.window;
+
+    const page = parse(url, document);
+    return page;
 }

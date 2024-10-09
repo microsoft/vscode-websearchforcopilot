@@ -10,7 +10,7 @@ import {
 	window,
 } from 'vscode';
 import { BetterTokenStorage } from './betterSecretStorage';
-import { WebSearchTool } from '../search/webSearch';
+import { BingEngine } from '../search/webSearch';
 
 export abstract class BaseAuthProvider implements AuthenticationProvider {
 	_didChangeSessions =
@@ -158,7 +158,7 @@ export class BingAuthProvider extends BaseAuthProvider {
 	protected async validateKey(key: string): Promise<boolean> {
 		try {
 			const req = await fetch(
-				WebSearchTool.BING_API_BASE_URL +
+				BingEngine.BING_API_BASE_URL +
 					'/v7.0/search?q=' +
 					encodeURIComponent('testing'),
 				{

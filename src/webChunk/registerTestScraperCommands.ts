@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { WebSearchTool } from '../search/webSearch';
 import { findBasicChunksBasedOnQuery, findNaiveChunksBasedOnQuery } from './chunkSearch';
 import { getDocumentFromPage, sectionToString, WebsiteIndex } from './index/websiteBasicIndex';
+import { TavilyEngine } from '../search/webSearch';
 
 export function registerScraperCommands(context: vscode.ExtensionContext) {
     // mostly for testing
@@ -41,7 +41,7 @@ export function registerScraperCommands(context: vscode.ExtensionContext) {
 
         const url = await promptForURL();
         const query = await promptForQuery();
-        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, true);
+        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, { tfidf: true, crawl: true });
 
         await vscode.workspace.openTextDocument({
             language: 'markdown', // Specify the language mode
@@ -59,7 +59,7 @@ export function registerScraperCommands(context: vscode.ExtensionContext) {
 
         const url = await promptForURL();
         const query = await promptForQuery();
-        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, false);
+        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, { tfidf: false, crawl: true });
 
         await vscode.workspace.openTextDocument({
             language: 'markdown', // Specify the language mode
@@ -84,7 +84,7 @@ function registerTavilyExtractor(context: vscode.ExtensionContext) {
         }
 
         const session = await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
-        const res = await WebSearchTool.tavilyExtract({
+        const res = await TavilyEngine.extract({
             urls: [url],
             api_key: session.accessToken,
         });
@@ -104,13 +104,9 @@ function registerTavilyExtractor(context: vscode.ExtensionContext) {
 
         const url = await promptForURL();
         const query = await promptForQuery();
-        const session = await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
+        await vscode.authentication.getSession('tavily', [], { createIfNone: true, clearSessionPreference: true });
 
-        const result = await WebSearchTool.tavilySearch({
-            api_key: session.accessToken,
-            query: query,
-            urls: [url]
-        });
+        const result = await TavilyEngine.search(query, url);
 
         if (result.urls.length === 0) {
             vscode.window.showErrorMessage('No results found.');

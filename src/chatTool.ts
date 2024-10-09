@@ -1,7 +1,9 @@
 import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, lm, PreparedToolInvocation, ProviderResult } from "vscode";
 import { getInternalTool } from "./tools";
-import { WebSearchTool } from "./search/webSearch";
+import { TavilyEngine } from "./search/webSearch";
 import { IWebSearchToolParameters } from "./search/webSearchTypes";
+import { scrape } from "./webChunk/crawler/webCrawler";
+import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 
 interface PublicWebSearchToolParameters {
     query: string;
@@ -12,8 +14,18 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
     static ID = 'vscode-websearchparticipant_publicWebSearch';
 
     async invoke(options: LanguageModelToolInvocationOptions<PublicWebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
-        const tool = getInternalTool<IWebSearchToolParameters, WebSearchTool>(WebSearchTool.ID)!;
-        const result = await tool.invoke(options, token);
+        const results = await TavilyEngine.search(options.parameters.query);
+
+        const urls = results.urls.map(u => u.url);
+        const chucks = await findNaiveChunksBasedOnQuery(
+            urls,
+            options.parameters.query,
+            {
+                tfidf: false,
+                crawl: false,
+            },
+            token
+        );
 
         // TODO: Have the language model take in the result of the internal tool and run other internal tools
         // const models = await lm.selectChatModels({
@@ -21,7 +33,8 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
         //     family: 'gpt-4o'
         // });
         // const model = models[0];
-
-        return result;
+        return {
+            'plain/text': JSON.stringify(chucks)
+        };
     }
 }

@@ -1,6 +1,6 @@
 import { window, ProgressLocation, Uri, CancellationToken } from "vscode";
 import { naiveChunk } from "../chunker/chunker";
-import { crawl } from "../crawler/webCrawler";
+import { crawl, scrape } from "../crawler/webCrawler";
 import { getDocumentFromPage, IWebsiteIndex } from "./websiteBasicIndex";
 import { FileChunk } from "../utils";
 import { EmbeddingsIndex } from "./embeddings";
@@ -11,7 +11,8 @@ export class WebsiteTFIDFNaiveChunkIndex implements IWebsiteIndex {
     private _loadPromise: Promise<TfIdf<FileChunk>>;
 
     constructor(
-        private _urls: string[]
+        private _urls: string[],
+        private _crawl: boolean
     ) {
         this._loadPromise = this._load();
     }
@@ -36,7 +37,7 @@ export class WebsiteTFIDFNaiveChunkIndex implements IWebsiteIndex {
                     title: `Crawling, Indexing, and Chunking ${url}`
                 },
                 async (_) => {
-                    const result = await crawl(url);
+                    const result = this._crawl ? await crawl(url) : [await scrape(url)];
                     return result;
                 }
             );
@@ -72,7 +73,8 @@ export class WebsiteEmbeddingsNaiveChunkIndex implements IWebsiteIndex {
     private _loadPromise: Promise<EmbeddingsIndex>;
 
     constructor(
-        private _urls: string[]
+        private _urls: string[],
+        private _crawl: boolean
     ) {
         this._loadPromise = this._load();
     }
@@ -97,7 +99,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex implements IWebsiteIndex {
                     title: `Crawling, Indexing, and Chunking ${url}`
                 },
                 async (_) => {
-                    const result = await crawl(url);
+                    const result = this._crawl ? await crawl(url) : [await scrape(url)];
                     return result;
                 }
             );

@@ -9,10 +9,15 @@ export async function findBasicChunksBasedOnQuery(url: string, query: string, ma
     return await index.search(query, maxResults);
 }
 
-export async function findNaiveChunksBasedOnQuery(urls: string[], query: string, tfidf: boolean, token?: vscode.CancellationToken, maxResults = 5) {
-    const index = tfidf ? new WebsiteTFIDFNaiveChunkIndex(urls) : new WebsiteEmbeddingsNaiveChunkIndex(urls);
+export async function findNaiveChunksBasedOnQuery(
+    urls: string[],
+    query: string,
+    { tfidf, maxResults, crawl }: { tfidf: boolean, maxResults?: number, crawl: boolean },
+    token?: vscode.CancellationToken,
+) {
+    const index = tfidf ? new WebsiteTFIDFNaiveChunkIndex(urls, crawl) : new WebsiteEmbeddingsNaiveChunkIndex(urls, crawl);
 
-    return await index.search(query, maxResults, token);
+    return await index.search(query, maxResults ?? 5, token);
 }
 
 export interface IChunkedWebContentToolParameters {
@@ -47,7 +52,15 @@ export class ChunkedWebContentTool implements vscode.LanguageModelTool<IChunkedW
         token: vscode.CancellationToken
     ): Promise<vscode.LanguageModelToolResult> {
         const urls = options.parameters.urls.split(',').map(s => s.trim()).filter(s => s.length > 0);
-        const chunks = await findNaiveChunksBasedOnQuery(urls, options.parameters.query, false, token);
+        const chunks = await findNaiveChunksBasedOnQuery(
+            urls,
+            options.parameters.query,
+            {
+                tfidf: false,
+                crawl: true
+            },
+            token
+        );
 
         const ret = chunks?.flatMap(c => c ? [
             c.file.toString(),
