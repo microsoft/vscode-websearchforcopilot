@@ -69,15 +69,38 @@ export function registerWebSearch(context: vscode.ExtensionContext) {
 }
 
 export class WebSearchTool implements vscode.LanguageModelTool<IWebSearchToolParameters> {
+	static ID = 'vscode-websearchparticipant_websearch';
+
+	static DETAILS: vscode.LanguageModelChatTool = {
+		name: WebSearchTool.ID,
+		description: 'uses a search provider to find relevant links based on a query',
+		parametersSchema: {
+			type: "object",
+			properties: {
+				query: {
+					type: "string",
+					description: "Search for files that match this glob pattern"
+				}
+			},
+			required: [ "query" ]
+		},
+	};
+
 	static TAVILY_API_BASE_URL = 'https://api.tavily.com';
 	static BING_API_BASE_URL = 'https://api.bing.microsoft.com';
 
 	async invoke(
 		options: vscode.LanguageModelToolInvocationOptions<IWebSearchToolParameters>,
 		token: vscode.CancellationToken
-	): Promise<vscode.ProviderResult<vscode.LanguageModelToolResult>> {
+	): Promise<vscode.LanguageModelToolResult> {
 		// TODO: maybe a slash command to intelligently pick bing vs tavily? idk
-		return WebSearchTool.tavilySearch(options.parameters as IWebSearchToolParameters);
+		const session = await vscode.authentication.getSession('tavily', [], { createIfNone: true });
+		return {
+			"text/plain": JSON.stringify(await WebSearchTool.tavilySearch({
+				...options.parameters as IWebSearchToolParameters,
+				api_key: session.accessToken,
+			}))
+		};
 	}
 
 	static async tavilySearch(params: IWebSearchToolParameters) {

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { FindFilesTool, RunInTerminalTool, TabCountTool } from './tools';
 import { registerScraper } from './scraper/registerScraper';
 import { TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';
@@ -31,10 +30,7 @@ function registerAuthProvider(context: vscode.ExtensionContext) {
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_tabCount', new TabCountTool()));
-    context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_findFiles', new FindFilesTool()));
-    context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_runInTerminal', new RunInTerminalTool()));
-    context.subscriptions.push(vscode.lm.registerTool('vscode-websearchparticipant_tools', new WebSearchTool()));
+    context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool()));
 }
 
 export function deactivate() { }
