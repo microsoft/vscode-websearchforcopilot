@@ -74,6 +74,37 @@
 		],
 		"languageModelTools": [
 			{
+				"id": "vscode-websearchparticipant_chunkedWebContent",
+				"tags": [
+					"web",
+					"search",
+					"vscode-websearchparticipant"
+				],
+				"displayName": "Chunked Web Content",
+				"canBeInvokedManually": true,
+				"name": "chunkedWebContent",
+				"icon": "search",
+				"userDescription": "Find relevant content on webpages",
+				"modelDescription": "From a list of webpages, find relevant content based on a query",
+				"parametersSchema": {
+					"type": "object",
+					"properties": {
+						"query": {
+							"type": "string",
+							"description": "Search for content on these websites based on this query"
+						},
+						"urls": {
+							"type": "string",
+							"description": "The URLs to search for content on, separated by commas"
+						}
+					},
+					"required": [ "query", "urls" ]
+				},
+				"supportedContentTypes": [
+					"text/plain"
+				]
+			},
+			{
 				"id": "vscode-websearchparticipant_publicWebSearch",
 				"tags": [
 					"web",

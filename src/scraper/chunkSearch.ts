@@ -15,16 +15,16 @@ export async function findNaiveChunksBasedOnQuery(urls: string[], query: string,
     return await index.search(query, maxResults, token);
 }
 
-export interface IChunkSearchToolParameters {
+export interface IChunkedWebContentToolParameters {
     query: string;
-    urls: string[];
+    urls: string;
 }
 
-export class ChunkSearchTool implements vscode.LanguageModelTool<IChunkSearchToolParameters> {
-    static ID = 'vscode-websearchparticipant_chunksearch';
+export class ChunkedWebContentTool implements vscode.LanguageModelTool<IChunkedWebContentToolParameters> {
+    static ID = 'vscode-websearchparticipant_chunkedWebContent';
 
     static DETAILS: vscode.LanguageModelChatTool = {
-        name: ChunkSearchTool.ID,
+        name: ChunkedWebContentTool.ID,
         description: 'Gets the relevant chunks from certain websites based on a query',
         parametersSchema: {
             type: "object",
@@ -34,8 +34,8 @@ export class ChunkSearchTool implements vscode.LanguageModelTool<IChunkSearchToo
                     description: "Search for content on these websites based on this query"
                 },
                 urls: {
-                    type: "array",
-                    description: "The URLs to search for content on"
+                    type: "string",
+                    description: "The URLs to search for content on, separated by commas"
                 }
             },
             required: ["query", "urls"]
@@ -43,10 +43,11 @@ export class ChunkSearchTool implements vscode.LanguageModelTool<IChunkSearchToo
     };
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<IChunkSearchToolParameters>,
+        options: vscode.LanguageModelToolInvocationOptions<IChunkedWebContentToolParameters>,
         token: vscode.CancellationToken
     ): Promise<vscode.LanguageModelToolResult> {
-        const chunks = await findNaiveChunksBasedOnQuery(options.parameters.urls, options.parameters.query, false, token);
+        const urls = options.parameters.urls.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        const chunks = await findNaiveChunksBasedOnQuery(urls, options.parameters.query, false, token);
 
         const ret = chunks?.flatMap(c => c ? [
             c.file.toString(),
