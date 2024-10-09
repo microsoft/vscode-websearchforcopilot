@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { isUnexpected } from "@azure-rest/ai-inference";
 import ModelClient from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
+import { tokenLength } from "../tokenizer";
 
 export type Embedding = readonly number[];
 type FileChunkWithEmbeddings = [FileChunk, Embedding];
@@ -67,11 +68,34 @@ export class EmbeddingsIndex {
 
         const inputs = Array.from(text);
         const ret = [];
-        while (inputs.length > 0) {
-            const subset = inputs.splice(0, 8);
-            ret.push(...await sendReq(subset));
+
+        const groups = await this.batchChunksIntoGroups(inputs, 4096); // taken around half of the token window
+        for (const group of groups) {
+            ret.push(...await sendReq(group));
         }
+
+        console.log(`sent ${groups.length} embeddings calls`);
         return ret;
+    }
+
+    async batchChunksIntoGroups(texts: string[], tokenSize: number): Promise<string[][]> {
+        const groups = [];
+        let group = [];
+        let groupSize = 0;
+        for (const text of texts) {
+            const size = await tokenLength(text);
+            if (groupSize + size > tokenSize) {
+                groups.push(group);
+                group = [];
+                groupSize = 0;
+            }
+            group.push(text);
+            groupSize += size;
+        }
+        if (group.length > 0) {
+            groups.push(group);
+        }
+        return groups;
     }
 
     rankEmbeddings<T>(
