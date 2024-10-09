@@ -74,79 +74,33 @@
 		],
 		"languageModelTools": [
 			{
-				"id": "vscode-websearchparticipant_tabCount",
+				"id": "vscode-websearchparticipant_publicWebSearch",
 				"tags": [
-					"editors",
-					"vscode-websearchparticipant"
-				],
-				"name": "tabCount",
-				"displayName": "Tab Count",
-				"modelDescription": "The number of active tabs in a tab group",
-				"icon": "$(files)",
-				"canBeInvokedManually": true,
-				"parametersSchema": {
-					"type": "object",
-					"properties": {
-						"tabGroup": {
-							"type": "number",
-							"description": "The index of the tab group to check. This is optional- if not specified, the active tab group will be checked.",
-							"default": 0
-						}
-					}
-				},
-				"supportedContentTypes": [
-					"text/plain"
-				]
-			},
-			{
-				"id": "vscode-websearchparticipant_findFiles",
-				"tags": [
-					"files",
+					"web",
 					"search",
 					"vscode-websearchparticipant"
 				],
-				"displayName": "Find Files",
-				"modelDescription": "Search for files in the current workspace",
+				"displayName": "Web Search",
+				"canBeInvokedManually": true,
+				"name": "websearch",
+				"icon": "globe",
+				"userDescription": "Search the web for relevant up-to-date information",
+				"modelDescription": "Search the web for relevant up-to-date information",
 				"parametersSchema": {
 					"type": "object",
 					"properties": {
-						"pattern": {
+						"query": {
 							"type": "string",
-							"description": "Search for files that match this glob pattern"
+							"description": "The query to search the web for"
 						}
 					},
 					"required": [
-						"pattern"
+						"query"
 					]
 				},
 				"supportedContentTypes": [
 					"text/plain"
 				]
-			},
-			{
-				"id": "vscode-websearchparticipant_runInTerminal",
-				"tags": [
-					"terminal",
-					"vscode-websearchparticipant"
-				],
-				"displayName": "Run in Terminal",
-				"modelDescription": "Run a command in a terminal and return the output",
-				"parametersSchema": {
-					"type": "object",
-					"properties": {
-						"command": {
-							"type": "string",
-							"description": "The command to run"
-						}
-					},
-					"required": [
-						"command"
-					]
-				},
-				"supportedContentTypes": [
-					"text/plain"
-				],
-				"requiresConfirmation": true
 			}
 		]
 	},

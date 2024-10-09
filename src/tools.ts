@@ -1,8 +1,8 @@
 import { Disposable, LanguageModelChatTool, LanguageModelTool, lm } from "vscode";
 
-interface LMTool {
-    ctor: new <T>() => LanguageModelTool<T>;
-    instance?: LanguageModelTool<any>;
+interface LMTool<O, T extends LanguageModelTool<O>> {
+    ctor: new () => T;
+    instance?: T;
     details: ILanguageModelToolDetails;
 }
 
@@ -10,7 +10,7 @@ export interface ILanguageModelToolDetails extends LanguageModelChatTool {
     type: 'internal' | 'public';
 }
 
-const internalTools = new Map<string, LMTool>();
+const internalTools = new Map<string, LMTool<any, any>>();
 
 export function getTools(): Array<ILanguageModelToolDetails> {
     return [...getPublicTools(), ...getInternalTools()];
@@ -32,7 +32,7 @@ export function getInternalTools(): Array<ILanguageModelToolDetails> {
     }));
 }
 
-export function getInternalTool<T>(id: string): LanguageModelTool<T> | undefined {
+export function getInternalTool<O, T extends LanguageModelTool<O>>(id: string): T | undefined {
     const tool = internalTools.get(id);
     if (!tool) {
         return undefined;

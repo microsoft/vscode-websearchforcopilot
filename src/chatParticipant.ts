@@ -1,9 +1,9 @@
-import { Location, LanguageModelChatResponseToolCallPart, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatTool, LanguageModelChatRequestOptions, LanguageModelChatMessage, LanguageModelChatResponseTextPart, LanguageModelChatMessageToolResultPart, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart, LanguageModelToolInvocationOptions } from "vscode";
+import { Location, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, LanguageModelChatMessage, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart, LanguageModelToolInvocationOptions, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelToolResultPart } from "vscode";
 import { WebSearchTool } from "./search/webSearch";
 import { getInternalTools, getTools, ILanguageModelToolDetails } from "./tools";
 
 interface IToolCall {
-    call: LanguageModelChatResponseToolCallPart;
+    call: LanguageModelToolCallPart;
     result: Thenable<LanguageModelToolResult>;
 }
 
@@ -58,9 +58,9 @@ class WebSearchChatParticipant {
             const toolCalls: IToolCall[] = [];
             const response = await model.sendRequest(messages, options, token);
             for await (const part of response.stream) {
-                if (part instanceof LanguageModelChatResponseTextPart) {
+                if (part instanceof LanguageModelTextPart) {
                     stream.markdown(part.value);
-                } else if (part instanceof LanguageModelChatResponseToolCallPart) {
+                } else if (part instanceof LanguageModelToolCallPart) {
                     const tool = allTools.find(tool => tool.name === part.name);
                     if (!tool) {
                         // BAD tool choice?
@@ -89,13 +89,13 @@ class WebSearchChatParticipant {
 
             if (toolCalls.length) {
                 const assistantMsg = LanguageModelChatMessage.Assistant('');
-                assistantMsg.content2 = toolCalls.map(toolCall => new LanguageModelChatResponseToolCallPart(toolCall.call.name, toolCall.call.toolCallId, toolCall.call.parameters));
+                assistantMsg.content2 = toolCalls.map(toolCall => new LanguageModelToolCallPart(toolCall.call.name, toolCall.call.toolCallId, toolCall.call.parameters));
                 messages.push(assistantMsg);
                 for (const toolCall of toolCalls) {
                     // NOTE that the result of calling a function is a special content type of a USER-message
                     const message = LanguageModelChatMessage.User('');
 
-                    message.content2 = [new LanguageModelChatMessageToolResultPart(toolCall.call.toolCallId, (await toolCall.result)['text/plain']!)];
+                    message.content2 = [new LanguageModelToolResultPart(toolCall.call.toolCallId, (await toolCall.result)['text/plain']!)];
                     messages.push(message);
                 }
 
@@ -110,7 +110,7 @@ class WebSearchChatParticipant {
         await runWithFunctions();
     };
 
-    private invokeTool(tool: ILanguageModelToolDetails, part: LanguageModelChatResponseToolCallPart, options: LanguageModelToolInvocationOptions<any>, token: CancellationToken): IToolCall {
+    private invokeTool(tool: ILanguageModelToolDetails, part: LanguageModelToolCallPart, options: LanguageModelToolInvocationOptions<any>, token: CancellationToken): IToolCall {
         return tool.type === 'internal'
             ? { call: part, result: this._webSearchTool.invoke(options, token) }
             : { call: part, result: lm.invokeTool(tool.name, options, token) };

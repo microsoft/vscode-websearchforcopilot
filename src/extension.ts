@@ -5,6 +5,7 @@ import { registerWebSearch, WebSearchTool } from './search/webSearch';
 import { registerChatParticipant } from './chatParticipant';
 import { registerScraperCommands } from './scraper/registerTestScraperCommands';
 import { registerInternalTool } from './tools';
+import { PublicWebSearchTool } from './chatTool';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProvider(context);
@@ -31,7 +32,8 @@ function registerAuthProvider(context: vscode.ExtensionContext) {
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {
-    registerInternalTool(WebSearchTool.ID, WebSearchTool.DETAILS, WebSearchTool);
+    context.subscriptions.push(registerInternalTool(WebSearchTool.ID, WebSearchTool.DETAILS, WebSearchTool));
+    context.subscriptions.push(vscode.lm.registerTool(PublicWebSearchTool.ID, new PublicWebSearchTool()));
 }
 
 export function deactivate() { }
