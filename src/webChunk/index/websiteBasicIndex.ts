@@ -1,7 +1,7 @@
 import { CancellationToken, Memento, ProgressLocation, Uri, window } from "vscode";
-import { TfIdf, TfIdfDoc } from "../chunkIndex/tfidf";
 import { Page, Section, crawl } from "../crawler/webCrawler";
 import { FileChunk } from "../utils";
+import { TfIdf, TfIdfDoc } from "./tfidf";
 
 export interface IWebChunk extends FileChunk {
     heading: string;
