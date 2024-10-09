@@ -9,7 +9,7 @@
 	"categories": [
 		"Other"
 	],
-	"activationEvents": [ ],
+	"activationEvents": [],
 	"enabledApiProposals": [
 		"lmTools"
 	],
@@ -98,7 +98,10 @@
 							"description": "The URLs to search for content on, separated by commas"
 						}
 					},
-					"required": [ "query", "urls" ]
+					"required": [
+						"query",
+						"urls"
+					]
 				},
 				"supportedContentTypes": [
 					"text/plain"
@@ -155,17 +158,18 @@
 		"@vscode/test-cli": "^0.0.4",
 		"@vscode/test-electron": "^2.3.8",
 		"eslint": "^8.54.0",
-		"typescript": "^5.3.2",
 		"ts-loader": "^9.5.1",
+		"typescript": "^5.3.2",
 		"webpack": "^5.91.0",
 		"webpack-cli": "^5.1.4"
 	},
 	"dependencies": {
-		"@types/jsdom": "^21.1.6",
-		"cheerio": "^1.0.0-rc.12",
-		"jsdom": "^24.0.0",
 		"@azure-rest/ai-inference": "latest",
 		"@azure/core-auth": "latest",
-		"@azure/core-sse": "latest"
+		"@azure/core-sse": "latest",
+		"@microsoft/tiktokenizer": "^1.0.8",
+		"@types/jsdom": "^21.1.6",
+		"cheerio": "^1.0.0-rc.12",
+		"jsdom": "^24.0.0"
 	}
 }
