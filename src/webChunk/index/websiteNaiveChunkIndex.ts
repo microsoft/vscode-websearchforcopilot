@@ -1,10 +1,10 @@
 import { window, ProgressLocation, Uri, CancellationToken } from "vscode";
 import { naiveChunk } from "../chunker/chunker";
+import { crawl } from "../crawler/webCrawler";
+import { getDocumentFromPage, IWebsiteIndex } from "./websiteBasicIndex";
+import { FileChunk } from "../utils";
 import { EmbeddingsIndex } from "./embeddings";
 import { TfIdf, TfIdfDoc } from "./tfidf";
-import { FileChunk } from "./utils";
-import { crawl } from "./webCrawler";
-import { getDocumentFromPage, IWebsiteIndex } from "./websiteBasicIndex";
 
 
 export class WebsiteTFIDFNaiveChunkIndex implements IWebsiteIndex {

@@ -1,6 +1,6 @@
-import { getDocumentFromPage, WebsiteIndex, sectionToString } from "./websiteBasicIndex";
-import { WebsiteTFIDFNaiveChunkIndex, WebsiteEmbeddingsNaiveChunkIndex } from "./websiteNaiveChunkIndex";
 import * as vscode from 'vscode';
+import { WebsiteIndex } from './index/websiteBasicIndex';
+import { WebsiteTFIDFNaiveChunkIndex, WebsiteEmbeddingsNaiveChunkIndex } from './index/websiteNaiveChunkIndex';
 
 // todo: ideally, the index persists across queries.
 export async function findBasicChunksBasedOnQuery(url: string, query: string, maxResults = 5) {

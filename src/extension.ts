@@ -3,10 +3,10 @@ import { TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';
 import { registerWebSearch, WebSearchTool } from './search/webSearch';
 import { registerChatParticipant } from './chatParticipant';
-import { registerScraperCommands } from './scraper/registerTestScraperCommands';
 import { registerInternalTool } from './tools';
 import { PublicWebSearchTool } from './chatTool';
-import { ChunkedWebContentTool } from './scraper/chunkSearch';
+import { registerScraperCommands } from './webChunk/registerTestScraperCommands';
+import { ChunkedWebContentTool } from './webChunk/chunkSearch';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProvider(context);

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { WebSearchTool } from '../search/webSearch';
 import { findBasicChunksBasedOnQuery, findNaiveChunksBasedOnQuery } from './chunkSearch';
-import { getDocumentFromPage, sectionToString, WebsiteIndex } from './websiteBasicIndex';
+import { getDocumentFromPage, sectionToString, WebsiteIndex } from './index/websiteBasicIndex';
 
 export function registerScraperCommands(context: vscode.ExtensionContext) {
     // mostly for testing

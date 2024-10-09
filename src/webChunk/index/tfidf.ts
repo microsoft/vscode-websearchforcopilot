@@ -3,7 +3,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Uri } from "vscode";
-import { FileChunk, ResourceMap } from "./utils";
+import { FileChunk, ResourceMap } from "../utils";
 
 type SparseEmbedding = Record</* word */ string, /* weight */number>;
 
@@ -115,7 +115,7 @@ export class TfIdf<T extends FileChunk> {
 
 	private readonly chunkOccurrences: DocumentOccurrences = new Map</* word */ string, /*documentOccurrences*/ number>();
 
-	 readonly documents = new ResourceMap<{
+	readonly documents = new ResourceMap<{
 		readonly chunks: ReadonlyArray<T & DocumentChunkEntry>;
 	}>();
 

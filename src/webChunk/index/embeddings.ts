@@ -1,4 +1,4 @@
-import { FileChunk, ResourceMap } from "./utils";
+import { FileChunk, ResourceMap } from "../utils";
 import * as vscode from 'vscode';
 import { isUnexpected } from "@azure-rest/ai-inference";
 import ModelClient from "@azure-rest/ai-inference";
