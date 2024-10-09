@@ -9,7 +9,7 @@
 	"categories": [
 		"Other"
 	],
-	"activationEvents": [],
+	"activationEvents": [ ],
 	"enabledApiProposals": [
 		"lmTools"
 	],
@@ -30,10 +30,10 @@
 				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunks",
 				"title": "Scrape and Show Related Naive Chunks Ranked by TF-IDF"
 			},
-            {
-              "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
-              "title": "Scrape and Show Related Naive Chunks Ranked by Embeddings"
-            },
+			{
+				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
+				"title": "Scrape and Show Related Naive Chunks Ranked by Embeddings"
+			},
 			{
 				"command": "vscode-websearchparticipant.tavilyScrapeAndGetChunks",
 				"title": "Scrape and Show Related Tavily Chunks"
@@ -133,8 +133,8 @@
 		"@types/jsdom": "^21.1.6",
 		"cheerio": "^1.0.0-rc.12",
 		"jsdom": "^24.0.0",
-        "@azure-rest/ai-inference": "latest",
-        "@azure/core-auth": "latest",
-        "@azure/core-sse": "latest"
+		"@azure-rest/ai-inference": "latest",
+		"@azure/core-auth": "latest",
+		"@azure/core-sse": "latest"
 	}
 }

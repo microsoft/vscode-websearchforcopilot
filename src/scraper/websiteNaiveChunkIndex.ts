@@ -11,7 +11,7 @@ export class WebsiteTFIDFNaiveChunkIndex implements IWebsiteIndex {
     private _loadPromise: Promise<TfIdf<FileChunk>>;
 
     constructor(
-        private _url: string
+        private _urls: string[]
     ) {
         this._loadPromise = this._load();
     }
@@ -27,41 +27,42 @@ export class WebsiteTFIDFNaiveChunkIndex implements IWebsiteIndex {
     }
 
     private async _load() {
-        let result = await window.withProgress(
-            {
-                location: ProgressLocation.Notification,
-                title: `Crawling, Indexing, and Chunking ${this._url}`
-            },
-            async (_) => {
-                const result = await crawl(this._url);
-                return result;
-            }
-        );
-
-
         const tfidf = new TfIdf<FileChunk>();
+        for (const url of this._urls) {
 
-        // Load TF-IDF
-        const tfidfDocs = new Array<TfIdfDoc<FileChunk>>;
-        for (const page of result) {
-            const vscodeUri = Uri.parse(page.url);
-            const document = getDocumentFromPage(page);
-            const sections = new Array<FileChunk>();
+            let result = await window.withProgress(
+                {
+                    location: ProgressLocation.Notification,
+                    title: `Crawling, Indexing, and Chunking ${url}`
+                },
+                async (_) => {
+                    const result = await crawl(url);
+                    return result;
+                }
+            );
 
-            const naiveChunks = naiveChunk(document, 400);
-            for (const chunk of naiveChunks) {
-                sections.push({
-                    file: vscodeUri,
-                    text: chunk,
-                });
+            // Load TF-IDF
+            const tfidfDocs = new Array<TfIdfDoc<FileChunk>>;
+            for (const page of result) {
+                const vscodeUri = Uri.parse(page.url);
+                const document = getDocumentFromPage(page);
+                const sections = new Array<FileChunk>();
+
+                const naiveChunks = naiveChunk(document, 400);
+                for (const chunk of naiveChunks) {
+                    sections.push({
+                        file: vscodeUri,
+                        text: chunk,
+                    });
+                }
+                const tfidfDoc = {
+                    uri: vscodeUri,
+                    chunks: sections
+                };
+                tfidfDocs.push(tfidfDoc);
             }
-            const tfidfDoc = {
-                uri: vscodeUri,
-                chunks: sections
-            };
-            tfidfDocs.push(tfidfDoc);
+            tfidf.addOrUpdate(tfidfDocs);
         }
-        tfidf.addOrUpdate(tfidfDocs);
         return tfidf;
     }
 
@@ -71,7 +72,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex implements IWebsiteIndex {
     private _loadPromise: Promise<EmbeddingsIndex>;
 
     constructor(
-        private _url: string
+        private _urls: string[]
     ) {
         this._loadPromise = this._load();
     }
@@ -87,35 +88,38 @@ export class WebsiteEmbeddingsNaiveChunkIndex implements IWebsiteIndex {
     }
 
     private async _load() {
-        let result = await window.withProgress(
-            {
-                location: ProgressLocation.Notification,
-                title: `Crawling, Indexing, and Chunking ${this._url}`
-            },
-            async (_) => {
-                const result = await crawl(this._url);
-                return result;
-            }
-        );
-
         const embeddingsIndex = new EmbeddingsIndex();
 
-        const docs = new Array<FileChunk>;
-        for (const page of result) {
-            const vscodeUri = Uri.parse(page.url);
-            const document = getDocumentFromPage(page);
-            const fileChunks = new Array<FileChunk>();
+        for (const url of this._urls) {
+            let result = await window.withProgress(
+                {
+                    location: ProgressLocation.Notification,
+                    title: `Crawling, Indexing, and Chunking ${url}`
+                },
+                async (_) => {
+                    const result = await crawl(url);
+                    return result;
+                }
+            );
 
-            const naiveChunks = naiveChunk(document, 400);
-            for (const chunk of naiveChunks) {
-                fileChunks.push({
-                    file: vscodeUri,
-                    text: chunk,
-                } satisfies FileChunk);
+
+            const docs = new Array<FileChunk>;
+            for (const page of result) {
+                const vscodeUri = Uri.parse(page.url);
+                const document = getDocumentFromPage(page);
+                const fileChunks = new Array<FileChunk>();
+
+                const naiveChunks = naiveChunk(document, 400);
+                for (const chunk of naiveChunks) {
+                    fileChunks.push({
+                        file: vscodeUri,
+                        text: chunk,
+                    } satisfies FileChunk);
+                }
+                docs.push(...fileChunks);
             }
-            docs.push(...fileChunks);
+            embeddingsIndex.add(docs);
         }
-        embeddingsIndex.add(docs);
         return embeddingsIndex;
     }
 
