@@ -41,7 +41,7 @@ export function registerScraperCommands(context: vscode.ExtensionContext) {
 
         const url = await promptForURL();
         const query = await promptForQuery();
-        const resultChunks = await findNaiveChunksBasedOnQuery(url, query, true);
+        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, true);
 
         await vscode.workspace.openTextDocument({
             language: 'markdown', // Specify the language mode
@@ -59,7 +59,7 @@ export function registerScraperCommands(context: vscode.ExtensionContext) {
 
         const url = await promptForURL();
         const query = await promptForQuery();
-        const resultChunks = await findNaiveChunksBasedOnQuery(url, query, false);
+        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, false);
 
         await vscode.workspace.openTextDocument({
             language: 'markdown', // Specify the language mode

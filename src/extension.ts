@@ -6,6 +6,7 @@ import { registerChatParticipant } from './chatParticipant';
 import { registerScraperCommands } from './scraper/registerTestScraperCommands';
 import { registerInternalTool } from './tools';
 import { PublicWebSearchTool } from './chatTool';
+import { ChunkedWebContentTool } from './scraper/chunkSearch';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProviders(context);
@@ -47,6 +48,9 @@ function registerAuthProviders(context: vscode.ExtensionContext) {
 function registerChatTools(context: vscode.ExtensionContext) {
     context.subscriptions.push(registerInternalTool(WebSearchTool.ID, WebSearchTool.DETAILS, WebSearchTool));
     context.subscriptions.push(vscode.lm.registerTool(PublicWebSearchTool.ID, new PublicWebSearchTool()));
+    context.subscriptions.push(registerInternalTool(ChunkedWebContentTool.ID, ChunkedWebContentTool.DETAILS, ChunkedWebContentTool));
+    // todo: remove since this is just for invoking chunk search manually
+    context.subscriptions.push(vscode.lm.registerTool(ChunkedWebContentTool.ID, new ChunkedWebContentTool()));
 }
 
 export function deactivate() { }
