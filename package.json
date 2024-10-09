@@ -24,15 +24,15 @@
 		"commands": [
 			{
 				"command": "vscode-websearchparticipant.scrapeAndGetChunks",
-				"title": "Scrape and Show Related TF-IDF Chunks"
+				"title": "Scrape and Show Related Chunks Ranked by TF-IDF"
 			},
 			{
 				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunks",
-				"title": "Scrape and Show Related TF-IDF Naive Chunks"
+				"title": "Scrape and Show Related Naive Chunks Ranked by TF-IDF"
 			},
             {
               "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
-              "title": "Scrape and Show Related Embeddings Naive Chunks"
+              "title": "Scrape and Show Related Naive Chunks Ranked by Embeddings"
             },
 			{
 				"command": "vscode-websearchparticipant.tavilyScrapeAndGetChunks",
