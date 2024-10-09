@@ -1,14 +1,18 @@
 import { AuthenticationProvider, AuthenticationProviderAuthenticationSessionsChangeEvent, AuthenticationSession, EventEmitter, ThemeIcon, Uri, env, l10n, window } from "vscode";
 import { BetterTokenStorage } from "./betterSecretStorage";
 
-export class TavilyAuthProvider implements AuthenticationProvider {
-	static readonly id = 'tavily';
+export abstract class BaseAuthProvider implements AuthenticationProvider {
 
 	_didChangeSessions = new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
 	onDidChangeSessions = this._didChangeSessions.event;
 
+	protected abstract readonly name: string;
+	protected abstract readonly createKeyUrl: string | undefined;
+
 	constructor(private readonly _secrets: BetterTokenStorage<AuthenticationSession>) {
 	}
+
+	protected abstract validateKey(key: string): Promise<boolean>;
 
 	async getSessions(_scopes?: string[]): Promise<AuthenticationSession[]> {
 
@@ -23,23 +27,26 @@ export class TavilyAuthProvider implements AuthenticationProvider {
 	async createSession(_scopes: string[]): Promise<AuthenticationSession> {
 		const input = window.createInputBox();
 		input.totalSteps = 2;
-		input.title = l10n.t('Tavily Login');
-		
+		input.title = l10n.t(`${this.name} Login`);
+
 		// Get API Key
 		input.step = 1;
-		input.placeholder = l10n.t('Enter your Tavily API key');
+		input.placeholder = l10n.t(`Enter your ${this.name} API key`);
 		input.ignoreFocusOut = true;
-		input.buttons = [
-			{
-				iconPath: new ThemeIcon('key'),
-				tooltip: l10n.t('Generate API key')
-			}
-		];
-		input.onDidTriggerButton(button => {
-			if (button === input.buttons[0]) {
-				env.openExternal(Uri.parse('https://app.tavily.com/home'));
-			}
-		});
+		if (this.createKeyUrl) {
+			const createKeyUrl = this.createKeyUrl;
+			input.buttons = [
+				{
+					iconPath: new ThemeIcon('key'),
+					tooltip: l10n.t('Generate API key')
+				}
+			];
+			input.onDidTriggerButton(button => {
+				if (button === input.buttons[0]) {
+					env.openExternal(Uri.parse(createKeyUrl));
+				}
+			});
+		}
 		input.onDidChangeValue(value => {
 			input.validationMessage = undefined;
 		});
@@ -90,7 +97,21 @@ export class TavilyAuthProvider implements AuthenticationProvider {
 		return authSession;
 	}
 
-	private async validateKey(key: string) {
+	async removeSession(sessionId: string): Promise<void> {
+		const removed = await this._secrets.get(sessionId);
+		await this._secrets.delete(sessionId);
+		this._didChangeSessions.fire({ added: [], removed: removed ? [removed] : [], changed: [] });
+	}
+}
+
+export class TavilyAuthProvider extends BaseAuthProvider {
+	static readonly ID = 'tavily';
+	static readonly NAME = 'Tavily';
+
+	protected name = TavilyAuthProvider.NAME;
+	protected createKeyUrl = 'https://app.tavily.com/home';
+
+	protected async validateKey(key: string) {
 		try {
 			const req = await fetch('https://api.tavily.com/search', {
 				method: 'POST',
@@ -110,14 +131,23 @@ export class TavilyAuthProvider implements AuthenticationProvider {
 				throw new Error(result.detail.error);
 			}
 			return true;
-		} catch(e: any) {
+		} catch (e: any) {
 			return false;
 		}
 	}
+}
 
-	async removeSession(sessionId: string): Promise<void> {
-		const removed = await this._secrets.get(sessionId);
-		await this._secrets.delete(sessionId);
-		this._didChangeSessions.fire({ added: [], removed: removed ? [removed] : [], changed: [] });
+export class BingAuthProvider extends BaseAuthProvider {
+	static readonly ID = 'bing';
+	static readonly NAME = 'Bing';
+
+	protected readonly name = BingAuthProvider.NAME;
+
+	// TODO
+	protected readonly createKeyUrl = undefined;
+
+	// TODO
+	protected validateKey(key: string): Promise<boolean> {
+		return Promise.resolve(true);
 	}
 }
