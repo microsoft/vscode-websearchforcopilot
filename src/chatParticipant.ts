@@ -1,9 +1,8 @@
-import { Location, LanguageModelChatResponseToolCallPart, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatTool, LanguageModelChatRequestOptions, LanguageModelChatMessage, LanguageModelChatResponseTextPart, LanguageModelChatMessageToolResultPart, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart } from "vscode";
+import { Location, LanguageModelChatResponseToolCallPart, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatTool, LanguageModelChatRequestOptions, LanguageModelChatMessage, LanguageModelChatResponseTextPart, LanguageModelChatMessageToolResultPart, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart, LanguageModelToolInvocationOptions } from "vscode";
 import { WebSearchTool } from "./search/webSearch";
-import { getInternalTools, getTools } from "./tools";
+import { getInternalTools, getTools, ILanguageModelToolDetails } from "./tools";
 
 interface IToolCall {
-    // tool: LanguageModelToolDescription;
     call: LanguageModelChatResponseToolCallPart;
     result: Thenable<LanguageModelToolResult>;
 }
@@ -29,7 +28,7 @@ class WebSearchChatParticipant {
         const model = models[0];
 
         const allTools = getTools();
-        const ourTools = getInternalTools();
+        const internalTools = getInternalTools();
 
         const options: LanguageModelChatRequestOptions = {
             justification: 'To parse web search results and summarize an answer',
@@ -53,13 +52,11 @@ class WebSearchChatParticipant {
                 options.tools = allTools.filter(tool => tool.name === requestedTool.id);
             } else {
                 options.toolChoice = undefined;
-                options.tools = ourTools;
+                options.tools = internalTools;
             }
 
             const toolCalls: IToolCall[] = [];
-
             const response = await model.sendRequest(messages, options, token);
-
             for await (const part of response.stream) {
                 if (part instanceof LanguageModelChatResponseTextPart) {
                     stream.markdown(part.value);
@@ -76,22 +73,17 @@ class WebSearchChatParticipant {
                         throw new Error(`Got invalid tool use parameters: "${part.parameters}". (${(err as Error).message})`);
                     }
 
-                    // TODO support prompt-tsx here
-
-                    const requestedContentType = 'text/plain';
-                    if (tool.name === WebSearchTool.ID) {
-                        toolCalls.push({
-                            call: part,
-                            result: this._webSearchTool.invoke({ parameters, toolInvocationToken: request.toolInvocationToken, requestedContentTypes: [requestedContentType] }, token),
-                            // tool
-                        });
-                    } else {
-                        toolCalls.push({
-                            call: part,
-                            result: lm.invokeTool(tool.name, { parameters, toolInvocationToken: request.toolInvocationToken, requestedContentTypes: [requestedContentType] }, token),
-                            // tool
-                        });
-                    }
+                    toolCalls.push(this.invokeTool(
+                        tool,
+                        part,
+                        {
+                            parameters,
+                            toolInvocationToken: request.toolInvocationToken,
+                            // TODO support prompt-tsx here
+                            requestedContentTypes: ['text/plain']
+                        },
+                        token
+                    ));
                 }
             }
 
@@ -117,6 +109,12 @@ class WebSearchChatParticipant {
 
         await runWithFunctions();
     };
+
+    private invokeTool(tool: ILanguageModelToolDetails, part: LanguageModelChatResponseToolCallPart, options: LanguageModelToolInvocationOptions<any>, token: CancellationToken): IToolCall {
+        return tool.type === 'internal'
+            ? { call: part, result: this._webSearchTool.invoke(options, token) }
+            : { call: part, result: lm.invokeTool(tool.name, options, token) };
+    }
 
     private async getContextMessage(references: ReadonlyArray<ChatPromptReference>): Promise<string> {
         const contextParts = (await Promise.all(references.map(async ref => {
@@ -169,6 +167,6 @@ class WebSearchChatParticipant {
 export function registerChatParticipant(context: ExtensionContext) {
     const chatParticipant = new WebSearchChatParticipant(context);
     const toolUser = chat.createChatParticipant('vscode-websearchparticipant.websearch', (request, context, response, token) => chatParticipant.handler(request, context, response, token));
-    toolUser.iconPath = new ThemeIcon('web');
+    toolUser.iconPath = new ThemeIcon('globe');
     context.subscriptions.push(toolUser);
 }

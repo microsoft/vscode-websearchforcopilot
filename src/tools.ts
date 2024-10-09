@@ -3,25 +3,33 @@ import { Disposable, LanguageModelChatTool, LanguageModelTool, lm } from "vscode
 interface LMTool {
     ctor: new <T>() => LanguageModelTool<T>;
     instance?: LanguageModelTool<any>;
-    details: LanguageModelChatTool;
+    details: ILanguageModelToolDetails;
+}
+
+export interface ILanguageModelToolDetails extends LanguageModelChatTool {
+    type: 'internal' | 'public';
 }
 
 const internalTools = new Map<string, LMTool>();
 
-export function getTools(): Array<LanguageModelChatTool> {
+export function getTools(): Array<ILanguageModelToolDetails> {
     return [...getPublicTools(), ...getInternalTools()];
 }
 
-export function getPublicTools(): Array<LanguageModelChatTool> {
+export function getPublicTools(): Array<ILanguageModelToolDetails> {
     return lm.tools.map(tool => ({
         name: tool.id,
+        type: 'public',
         description: tool.description,
         parametersSchema: tool.parametersSchema,
     }));
 }
 
-export function getInternalTools(): Array<LanguageModelChatTool> {
-    return Array.from(internalTools.values()).map(tool => tool.details);
+export function getInternalTools(): Array<ILanguageModelToolDetails> {
+    return Array.from(internalTools.values()).map(tool => ({
+        ...tool.details,
+        type: 'internal',
+    }));
 }
 
 export function getInternalTool<T>(id: string): LanguageModelTool<T> | undefined {
@@ -39,7 +47,10 @@ export function getInternalTool<T>(id: string): LanguageModelTool<T> | undefined
 export function registerInternalTool(id: string, details: LanguageModelChatTool, ctor: new () => LanguageModelTool<any>): Disposable {
     internalTools.set(id, {
         ctor,
-        details,
+        details: {
+            ...details,
+            type: 'internal',
+        },
     });
     return {
         dispose() {
