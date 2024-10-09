@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
-import { registerScraper } from './scraper/registerScraper';
 import { TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';
 import { registerWebSearch, WebSearchTool } from './search/webSearch';
 import { registerChatParticipant } from './chatParticipant';
+import { registerScraperCommands } from './scraper/registerTestScraperCommands';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProvider(context);
     registerChatTools(context);
     registerChatParticipant(context);
-    registerScraper(context);
+    registerScraperCommands(context);
     registerWebSearch(context);
 }
 
