@@ -1,5 +1,5 @@
 import { registerTavilyExtractor } from "./registerTavilyScraper";
-import { getDocumentFromPage, WebsiteIndex,sectionToString, WebsiteNaiveChunkIndex } from "./websiteIndex";
+import { getDocumentFromPage, WebsiteIndex,sectionToString, WebsiteTFIDFNaiveChunkIndex, WebsiteEmbeddingsNaiveChunkIndex } from "./websiteIndex";
 import * as vscode from 'vscode';
 
 export function registerScraper(context: vscode.ExtensionContext) {
@@ -48,6 +48,22 @@ export function registerScraper(context: vscode.ExtensionContext) {
         console.log(resultChunks);
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings', async () => {
+
+        const url = await promptForURL();
+        const resultChunks = await findNaiveChunksBasedOnQueryUsingEmbeddings(url);
+        
+        await vscode.workspace.openTextDocument({
+            language: 'markdown', // Specify the language mode
+            content: resultChunks?.flatMap(c => c ? [
+                '',
+                c.text,
+                '',
+                '-------------------',
+            ]:[]).join('\n'),
+          });
+        console.log(resultChunks);
+    }));
 }
 
 export async function promptForURL() {
@@ -89,11 +105,16 @@ async function findChunksBasedOnQuery(url: string) {
 
 async function findNaiveChunksBasedOnQuery(url: string) {
     const query = await promptForQuery();
-    const index = new WebsiteNaiveChunkIndex(url);
+    const index = new WebsiteTFIDFNaiveChunkIndex(url);
 
     return await index.search(query, 5);
 }
+async function findNaiveChunksBasedOnQueryUsingEmbeddings(url: string) {
+    const query = await promptForQuery();
+    const index = new WebsiteEmbeddingsNaiveChunkIndex(url);
 
+    return await index.search(query, 5);
+}
 async function getAllPageContent(url: string) {
     const index = new WebsiteIndex(url);
     const pages = await index.getAllChunks();

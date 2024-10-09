@@ -14,7 +14,12 @@ export function naiveChunk(text: string, maxEstimatedTokens: number): string[] {
                 lastLineWasBlank = true;
             }
         }
-        if (currentChunkSize + line.length > maxChars) {
+        if (line.length> maxChars) {
+            chunks.push(currentChunkLines.join('\n'));
+            chunks.push(line.substring(0, maxChars));
+            currentChunkSize = 0;
+            currentChunkLines = [];
+        } else if (currentChunkSize + line.length > maxChars) {
             chunks.push(currentChunkLines.join('\n'));
             currentChunkSize = line.length;
             currentChunkLines = [line];

@@ -31,6 +31,10 @@
         "title": "Scrape and Show Related TF-IDF Naive Chunks"
       },
       {
+        "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
+        "title": "Scrape and Show Related Embeddings Naive Chunks"
+      },
+      {
         "command":"vscode-websearchparticipant.tavilyScrapeAndGetChunks",
         "title": "Scrape and Show Related Tavily Chunks"
       },
@@ -164,6 +168,9 @@
   "dependencies": {
     "@types/jsdom": "^21.1.6",
     "cheerio": "^1.0.0-rc.12",
-    "jsdom": "^24.0.0"
+    "jsdom": "^24.0.0",
+    "@azure-rest/ai-inference": "latest",
+    "@azure/core-auth": "latest",
+    "@azure/core-sse": "latest"
   }
 }

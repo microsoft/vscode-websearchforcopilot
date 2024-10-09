@@ -3,6 +3,7 @@ import { TfIdf, TfIdfDoc } from "./tfidf";
 import { Page, Section, crawl } from "./webCrawler";
 import { FileChunk } from "./utils";
 import { naiveChunk } from "../chunker/chunker";
+import { EmbeddingsIndex } from "./embeddings";
 
 export interface IWebChunk extends FileChunk {
     heading: string;
@@ -86,7 +87,7 @@ export class WebsiteIndex implements IWebsiteIndex {
 }
 
 
-export class WebsiteNaiveChunkIndex {
+export class WebsiteTFIDFNaiveChunkIndex {
     private _loadPromise: Promise<TfIdf<FileChunk>>;
     
     constructor(
@@ -146,6 +147,60 @@ export class WebsiteNaiveChunkIndex {
 
 }
 
+export class WebsiteEmbeddingsNaiveChunkIndex {
+    private _loadPromise: Promise<EmbeddingsIndex>;
+    
+    constructor(
+        private _url: string, 
+    ) {
+        this._loadPromise = this._load();
+    }
+
+    async search(query: string, maxResults: number): Promise<FileChunk[]> {
+        const embeddingsIndex = await this._loadPromise;
+        const score = embeddingsIndex.search(query, maxResults);
+        return score;
+    }
+
+    async refresh() {
+        this._loadPromise = this._load();
+    }
+
+    private async _load() {
+        let result = await window.withProgress(
+            {
+                location: ProgressLocation.Notification,
+                title: `Crawling, Indexing, and Chunking ${this._url}`
+            },
+            async (_) => {
+                const result = await crawl(this._url);
+                return result;
+            }
+        );
+
+        const embeddingsIndex = new EmbeddingsIndex();
+        
+        const docs = new Array<FileChunk>;
+        for (const page of result) {
+            const vscodeUri = Uri.parse(page.url);
+            const document = getDocumentFromPage(page);
+            const fileChunks = new Array<FileChunk>();
+
+            const naiveChunks = naiveChunk(document, 400);
+            for (const chunk of naiveChunks) {
+                fileChunks.push({
+                    file: vscodeUri,
+                    text: chunk,
+                } satisfies FileChunk);
+            }
+            docs.push(...fileChunks);
+        }
+        embeddingsIndex.add(docs);
+        return embeddingsIndex;
+    }
+
+}
+
 export function getDocumentFromPage(page: Page):string {
     const strBuffer:string[] = [page.url, ''];
 
@@ -165,3 +220,4 @@ export function sectionToString(section: Section): string[] {
     return strBuffer;
 
 }
+

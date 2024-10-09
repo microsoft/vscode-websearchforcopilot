@@ -1,6 +1,6 @@
 import { promptForQuery, promptForURL } from "./registerScraper";
 import * as vscode from 'vscode';
-import { WebsiteNaiveChunkIndex } from "./websiteIndex";
+import { WebsiteTFIDFNaiveChunkIndex } from "./websiteIndex";
 import { WebSearchTool } from "../search/webSearch";
 
 export function registerTavilyExtractor(context: vscode.ExtensionContext) {
