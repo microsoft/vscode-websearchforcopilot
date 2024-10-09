@@ -52,6 +52,11 @@
 				"category": "Tavily"
 			},
 			{
+				"title": "Hi",
+				"command": "bing-authentication-provider.hi",
+				"category": "Bing"
+			},
+			{
 				"title": "Tavily Search",
 				"command": "vscode-websearchparticipant.tavilySearch",
 				"category": "Web Search"
