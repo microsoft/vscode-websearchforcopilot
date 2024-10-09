@@ -42,10 +42,10 @@ export function registerWebSearch(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('vscode-websearchparticipant.bingSearch', async () => {
-			// const auth = await vscode.authentication.getSession('bing', [], {
-			// 	createIfNone: true,
-			// 	clearSessionPreference: true,
-			// });
+			const auth = await vscode.authentication.getSession('bing', [], {
+				createIfNone: true,
+				clearSessionPreference: true,
+			});
 
 			const query = await vscode.window.showInputBox({
 				prompt: 'Enter your search query',
@@ -58,7 +58,7 @@ export function registerWebSearch(context: vscode.ExtensionContext) {
 			}
 
 			const result = await WebSearchTool.bingSearch({
-				api_key: '72d22ec885834394b1c276447b8a7656', // this is our key lol
+				api_key: auth.accessToken,
 				query: query,
 				urls: undefined,
 			});

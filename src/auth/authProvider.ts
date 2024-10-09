@@ -1,21 +1,30 @@
-import { AuthenticationProvider, AuthenticationProviderAuthenticationSessionsChangeEvent, AuthenticationSession, EventEmitter, ThemeIcon, Uri, env, l10n, window } from "vscode";
-import { BetterTokenStorage } from "./betterSecretStorage";
+import {
+	AuthenticationProvider,
+	AuthenticationProviderAuthenticationSessionsChangeEvent,
+	AuthenticationSession,
+	EventEmitter,
+	ThemeIcon,
+	Uri,
+	env,
+	l10n,
+	window,
+} from 'vscode';
+import { BetterTokenStorage } from './betterSecretStorage';
+import { WebSearchTool } from '../search/webSearch';
 
 export abstract class BaseAuthProvider implements AuthenticationProvider {
-
-	_didChangeSessions = new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
+	_didChangeSessions =
+		new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
 	onDidChangeSessions = this._didChangeSessions.event;
 
 	protected abstract readonly name: string;
 	protected abstract readonly createKeyUrl: string | undefined;
 
-	constructor(private readonly _secrets: BetterTokenStorage<AuthenticationSession>) {
-	}
+	constructor(private readonly _secrets: BetterTokenStorage<AuthenticationSession>) {}
 
 	protected abstract validateKey(key: string): Promise<boolean>;
 
 	async getSessions(_scopes?: string[]): Promise<AuthenticationSession[]> {
-
 		try {
 			return await this._secrets.getAll();
 		} catch (e) {
@@ -38,16 +47,16 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 			input.buttons = [
 				{
 					iconPath: new ThemeIcon('key'),
-					tooltip: l10n.t('Generate API key')
-				}
+					tooltip: l10n.t('Generate API key'),
+				},
 			];
-			input.onDidTriggerButton(button => {
+			input.onDidTriggerButton((button) => {
 				if (button === input.buttons[0]) {
 					env.openExternal(Uri.parse(createKeyUrl));
 				}
 			});
 		}
-		input.onDidChangeValue(value => {
+		input.onDidChangeValue((value) => {
 			input.validationMessage = undefined;
 		});
 		input.show();
@@ -86,9 +95,9 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 			id,
 			account: {
 				label: name,
-				id: name
+				id: name,
 			},
-			scopes: []
+			scopes: [],
 		};
 
 		// Store and return the session
@@ -126,7 +135,7 @@ export class TavilyAuthProvider extends BaseAuthProvider {
 				}),
 			});
 
-			const result = await req.json() as any;
+			const result = (await req.json()) as any;
 			if (!req.ok) {
 				throw new Error(result.detail.error);
 			}
@@ -143,11 +152,30 @@ export class BingAuthProvider extends BaseAuthProvider {
 
 	protected readonly name = BingAuthProvider.NAME;
 
-	// TODO
-	protected readonly createKeyUrl = undefined;
+	protected readonly createKeyUrl = 'https://ms.portal.azure.com/#home';
 
 	// TODO
-	protected validateKey(key: string): Promise<boolean> {
-		return Promise.resolve(true);
+	protected async validateKey(key: string): Promise<boolean> {
+		try {
+			const req = await fetch(
+				WebSearchTool.BING_API_BASE_URL +
+					'/v7.0/search?q=' +
+					encodeURIComponent('testing'),
+				{
+					method: 'GET',
+					headers: {
+						'Ocp-Apim-Subscription-Key': key,
+					},
+				}
+			);
+
+			const result = (await req.json()) as any;
+			if (!req.ok) {
+				throw new Error(result.detail.error);
+			}
+			return true;
+		} catch (e: any) {
+			return false;
+		}
 	}
 }
