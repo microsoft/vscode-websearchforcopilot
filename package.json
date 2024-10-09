@@ -1,176 +1,186 @@
 {
-  "name": "vscode-websearchparticipant",
-  "displayName": "vscode-websearchparticipant",
-  "description": "",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.94.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
-  "enabledApiProposals": [
-      "lmTools"
-  ],
-  "main": "./dist/extension.js",
-  "contributes": {
-    "authentication": [
-        {
-            "id": "tavily",
-            "label": "Tavily"
-        }
-    ],
-    "commands": [
-      {
-        "command":"vscode-websearchparticipant.scrapeAndGetChunks",
-        "title": "Scrape and Show Related TF-IDF Chunks"
-      },
-      {
-        "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunks",
-        "title": "Scrape and Show Related TF-IDF Naive Chunks"
-      },
-      {
-        "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
-        "title": "Scrape and Show Related Embeddings Naive Chunks"
-      },
-      {
-        "command":"vscode-websearchparticipant.tavilyScrapeAndGetChunks",
-        "title": "Scrape and Show Related Tavily Chunks"
-      },
-      {
-        "command":"vscode-websearchparticipant.scrapeAndOpenWholeDocument",
-        "title": "Scrape and Open Info As Document"
-      },
-      {
-        "command":"vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",
-        "title": "Tavily Extract and Open Info As Document"
-      },
-      {
-        "title": "Hi",
-        "command": "tavily-authentication-provider.hi",
-        "category": "Tavily"
-      },
-      {
-        "title": "Search",
-        "command": "vscode-websearchparticipant.search",
-        "category": "Web Search"
-      }
-    ],
-    "chatParticipants": [
-        {
-            "id": "vscode-websearchparticipant.websearch",
-            "fullName": "Web Search",
-            "name": "websearch",
-            "description": "Search the web for relevant up-to-date information",
-            "isSticky": true,
-            "supportsToolReferences": true
-        }
-    ],
-    "languageModelTools": [
-        {
-            "id": "vscode-websearchparticipant_tabCount",
-            "tags": ["editors", "vscode-websearchparticipant"],
-            "name": "tabCount",
-            "displayName": "Tab Count",
-            "modelDescription": "The number of active tabs in a tab group",
-            "icon": "$(files)",
-            "canBeInvokedManually": true,
-            "parametersSchema": {
-                "type": "object",
-                "properties": {
-                    "tabGroup": {
-                        "type": "number",
-                        "description": "The index of the tab group to check. This is optional- if not specified, the active tab group will be checked.",
-                        "default": 0
-                    }
-                }
+	"name": "vscode-websearchparticipant",
+	"displayName": "vscode-websearchparticipant",
+	"description": "",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.94.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [],
+	"enabledApiProposals": [
+		"lmTools"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"authentication": [
+			{
+				"id": "tavily",
+				"label": "Tavily"
+			}
+		],
+		"commands": [
+			{
+				"command": "vscode-websearchparticipant.scrapeAndGetChunks",
+				"title": "Scrape and Show Related TF-IDF Chunks"
+			},
+			{
+				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunks",
+				"title": "Scrape and Show Related TF-IDF Naive Chunks"
+			},
+            {
+              "command":"vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
+              "title": "Scrape and Show Related Embeddings Naive Chunks"
             },
-            "supportedContentTypes": [
-                "text/plain"
-            ]
-        },
-        {
-            "id": "vscode-websearchparticipant_findFiles",
-            "tags": [
-                "files",
-                "search",
-                "vscode-websearchparticipant"
-            ],
-            "displayName": "Find Files",
-            "modelDescription": "Search for files in the current workspace",
-            "parametersSchema": {
-                "type": "object",
-                "properties": {
-                    "pattern": {
-                        "type": "string",
-                        "description": "Search for files that match this glob pattern"
-                    }
-                },
-                "required": ["pattern"]
-            },
-            "supportedContentTypes": [
-                "text/plain"
-            ]
-        },
-        {
-            "id": "vscode-websearchparticipant_runInTerminal",
-            "tags": [
-                "terminal",
-                "vscode-websearchparticipant"
-            ],
-            "displayName": "Run in Terminal",
-            "modelDescription": "Run a command in a terminal and return the output",
-            "parametersSchema": {
-                "type": "object",
-                "properties": {
-                    "command": {
-                        "type": "string",
-                        "description": "The command to run"
-                    }
-                },
-                "required": [
-                    "command"
-                ]
-            },
-            "supportedContentTypes": [
-                "text/plain"
-            ],
-            "requiresConfirmation": true
-        }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "watch": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "compile-tests": "tsc -p . --outDir dist",
-    "watch-tests": "tsc -p . -w --outDir dist",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "vscode-test"
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.6",
-    "@types/node": "18.x",
-    "@types/vscode": "^1.86.0",
-    "@typescript-eslint/eslint-plugin": "^6.13.1",
-    "@typescript-eslint/parser": "^6.13.1",
-    "@vscode/test-cli": "^0.0.4",
-    "@vscode/test-electron": "^2.3.8",
-    "eslint": "^8.54.0",
-    "typescript": "^5.3.2",
-    "ts-loader": "^9.5.1",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "@types/jsdom": "^21.1.6",
-    "cheerio": "^1.0.0-rc.12",
-    "jsdom": "^24.0.0",
-    "@azure-rest/ai-inference": "latest",
-    "@azure/core-auth": "latest",
-    "@azure/core-sse": "latest"
-  }
+			{
+				"command": "vscode-websearchparticipant.tavilyScrapeAndGetChunks",
+				"title": "Scrape and Show Related Tavily Chunks"
+			},
+			{
+				"command": "vscode-websearchparticipant.scrapeAndOpenWholeDocument",
+				"title": "Scrape and Open Info As Document"
+			},
+			{
+				"command": "vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",
+				"title": "Tavily Extract and Open Info As Document"
+			},
+			{
+				"title": "Hi",
+				"command": "tavily-authentication-provider.hi",
+				"category": "Tavily"
+			},
+			{
+				"title": "Tavily Search",
+				"command": "vscode-websearchparticipant.tavilySearch",
+				"category": "Web Search"
+			},
+			{
+				"title": "Bing Search",
+				"command": "vscode-websearchparticipant.bingSearch",
+				"category": "Web Search"
+			}
+		],
+		"chatParticipants": [
+			{
+				"id": "vscode-websearchparticipant.websearch",
+				"fullName": "Web Search",
+				"name": "websearch",
+				"description": "Search the web for relevant up-to-date information",
+				"isSticky": true,
+				"supportsToolReferences": true
+			}
+		],
+		"languageModelTools": [
+			{
+				"id": "vscode-websearchparticipant_tabCount",
+				"tags": [
+					"editors",
+					"vscode-websearchparticipant"
+				],
+				"name": "tabCount",
+				"displayName": "Tab Count",
+				"modelDescription": "The number of active tabs in a tab group",
+				"icon": "$(files)",
+				"canBeInvokedManually": true,
+				"parametersSchema": {
+					"type": "object",
+					"properties": {
+						"tabGroup": {
+							"type": "number",
+							"description": "The index of the tab group to check. This is optional- if not specified, the active tab group will be checked.",
+							"default": 0
+						}
+					}
+				},
+				"supportedContentTypes": [
+					"text/plain"
+				]
+			},
+			{
+				"id": "vscode-websearchparticipant_findFiles",
+				"tags": [
+					"files",
+					"search",
+					"vscode-websearchparticipant"
+				],
+				"displayName": "Find Files",
+				"modelDescription": "Search for files in the current workspace",
+				"parametersSchema": {
+					"type": "object",
+					"properties": {
+						"pattern": {
+							"type": "string",
+							"description": "Search for files that match this glob pattern"
+						}
+					},
+					"required": [
+						"pattern"
+					]
+				},
+				"supportedContentTypes": [
+					"text/plain"
+				]
+			},
+			{
+				"id": "vscode-websearchparticipant_runInTerminal",
+				"tags": [
+					"terminal",
+					"vscode-websearchparticipant"
+				],
+				"displayName": "Run in Terminal",
+				"modelDescription": "Run a command in a terminal and return the output",
+				"parametersSchema": {
+					"type": "object",
+					"properties": {
+						"command": {
+							"type": "string",
+							"description": "The command to run"
+						}
+					},
+					"required": [
+						"command"
+					]
+				},
+				"supportedContentTypes": [
+					"text/plain"
+				],
+				"requiresConfirmation": true
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run package",
+		"compile": "webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"compile-tests": "tsc -p . --outDir dist",
+		"watch-tests": "tsc -p . -w --outDir dist",
+		"pretest": "npm run compile-tests && npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "vscode-test"
+	},
+	"devDependencies": {
+		"@types/mocha": "^10.0.6",
+		"@types/node": "18.x",
+		"@types/vscode": "^1.86.0",
+		"@typescript-eslint/eslint-plugin": "^6.13.1",
+		"@typescript-eslint/parser": "^6.13.1",
+		"@vscode/test-cli": "^0.0.4",
+		"@vscode/test-electron": "^2.3.8",
+		"eslint": "^8.54.0",
+		"typescript": "^5.3.2",
+		"ts-loader": "^9.5.1",
+		"webpack": "^5.91.0",
+		"webpack-cli": "^5.1.4"
+	},
+	"dependencies": {
+		"@types/jsdom": "^21.1.6",
+		"cheerio": "^1.0.0-rc.12",
+		"jsdom": "^24.0.0",
+        "@azure-rest/ai-inference": "latest",
+        "@azure/core-auth": "latest",
+        "@azure/core-sse": "latest"
+	}
 }
