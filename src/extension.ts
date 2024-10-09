@@ -4,6 +4,7 @@ import { BetterTokenStorage } from './auth/betterSecretStorage';
 import { registerWebSearch, WebSearchTool } from './search/webSearch';
 import { registerChatParticipant } from './chatParticipant';
 import { registerScraperCommands } from './scraper/registerTestScraperCommands';
+import { registerInternalTool } from './tools';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProvider(context);
@@ -30,7 +31,7 @@ function registerAuthProvider(context: vscode.ExtensionContext) {
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool()));
+    registerInternalTool(WebSearchTool.ID, WebSearchTool.DETAILS, WebSearchTool);
 }
 
 export function deactivate() { }

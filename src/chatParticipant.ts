@@ -1,5 +1,6 @@
-import { Location, LanguageModelToolDescription, LanguageModelChatResponseToolCallPart, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatTool, LanguageModelChatRequestOptions, LanguageModelChatMessage, LanguageModelChatResponseTextPart, LanguageModelChatMessageToolResultPart, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart } from "vscode";
+import { Location, LanguageModelChatResponseToolCallPart, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatTool, LanguageModelChatRequestOptions, LanguageModelChatMessage, LanguageModelChatResponseTextPart, LanguageModelChatMessageToolResultPart, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart } from "vscode";
 import { WebSearchTool } from "./search/webSearch";
+import { getInternalTools, getTools } from "./tools";
 
 interface IToolCall {
     // tool: LanguageModelToolDescription;
@@ -27,14 +28,8 @@ class WebSearchChatParticipant {
         });
         const model = models[0];
 
-        const allTools = lm.tools.map(tool => ({
-            name: tool.id,
-            description: tool.description,
-            parametersSchema: tool.parametersSchema,
-        }));
-        const ourTools: LanguageModelChatTool[] = [
-            WebSearchTool.DETAILS
-        ];
+        const allTools = getTools();
+        const ourTools = getInternalTools();
 
         const options: LanguageModelChatRequestOptions = {
             justification: 'To parse web search results and summarize an answer',
@@ -55,7 +50,7 @@ class WebSearchChatParticipant {
             const requestedTool = toolReferences.shift();
             if (requestedTool) {
                 options.toolChoice = requestedTool.id;
-                options.tools = [...allTools, ...ourTools].filter(tool => tool.name === requestedTool.id);
+                options.tools = allTools.filter(tool => tool.name === requestedTool.id);
             } else {
                 options.toolChoice = undefined;
                 options.tools = ourTools;
@@ -69,7 +64,7 @@ class WebSearchChatParticipant {
                 if (part instanceof LanguageModelChatResponseTextPart) {
                     stream.markdown(part.value);
                 } else if (part instanceof LanguageModelChatResponseToolCallPart) {
-                    const tool = [...allTools, ...ourTools].find(tool => tool.name === part.name);
+                    const tool = allTools.find(tool => tool.name === part.name);
                     if (!tool) {
                         // BAD tool choice?
                         throw new Error('Got invalid tool choice: ' + part.name);
