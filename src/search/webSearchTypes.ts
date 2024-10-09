@@ -1,3 +1,8 @@
+export interface ISearchEngine {
+	search(query: string): Promise<IWebSearchResults>;
+	extract?: (params: ITavilyExtractParameters) => Promise<ITavilyExtractResponse>;
+}
+
 export interface IWebSearchToolParameters {
 	api_key: string;
 	query: string;

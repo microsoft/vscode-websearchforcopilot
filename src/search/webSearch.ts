@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ITavilySearchOptions, IWebSearchResults, ITavilyExtractParameters, ITavilyExtractResponse } from './webSearchTypes';
+import { ITavilySearchOptions, IWebSearchResults, ITavilyExtractParameters, ITavilyExtractResponse, ISearchEngine } from './webSearchTypes';
 
 export function registerWebSearch(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.tavilySearch', async () => {
@@ -38,7 +38,31 @@ export function registerWebSearch(context: vscode.ExtensionContext) {
 	}));
 }
 
-export class TavilyEngine {
+export class SearchEngineManager {
+
+	private searchEngine: ISearchEngine | undefined;
+
+	constructor() { }
+
+	public getEngine(): ISearchEngine {
+		if (!this.searchEngine) {
+			// TODO: prompt user for engine and set
+			throw new Error('Search engine not set.');
+		}
+		return this.searchEngine;
+	}
+
+	public search(query: string): Promise<IWebSearchResults> {
+		return this.getEngine().search(query);
+	}
+}
+
+
+export class TavilyEngine implements ISearchEngine {
+	search(query: string): Promise<IWebSearchResults> {
+		throw new Error('Method not implemented.');
+	}
+	extract?: ((params: ITavilyExtractParameters) => Promise<ITavilyExtractResponse>) | undefined;
 	static TAVILY_API_BASE_URL = 'https://api.tavily.com';
 
 	static async search(query: string, url?: string): Promise<IWebSearchResults> {
