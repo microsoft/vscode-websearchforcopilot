@@ -6,7 +6,7 @@ import { AzureKeyCredential } from "@azure/core-auth";
 import { tokenLength } from "../tokenizer";
 
 export type Embedding = readonly number[];
-type FileChunkWithEmbeddings = [FileChunk, Embedding];
+type FileChunkWithEmbeddings = [FileChunkWithScorer, Embedding];
 const modelName = "text-embedding-3-small";
 const endpoint = "https://models.inference.ai.azure.com";
 
@@ -24,6 +24,10 @@ function stringHash(str: string): number {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
+}
+
+export interface FileChunkWithScorer extends FileChunk {
+    scoreBonus: number;
 }
 
 export class EmbeddingsCache {
@@ -47,23 +51,23 @@ export class EmbeddingsCache {
 }
 
 export class EmbeddingsIndex {
-    chunks: FileChunk[] = [];
+    chunks: FileChunkWithScorer[] = [];
 
-    constructor(private embeddingsCache: EmbeddingsCache) { }
+    constructor(private embeddingsCache: EmbeddingsCache, private urlRankMap: ResourceMap<number>) { }
 
-    public add(documents: ReadonlyArray<FileChunk>): void {
+    public add(documents: ReadonlyArray<FileChunkWithScorer>): void {
         this.chunks.push(...documents);
     }
 
-    public async search(query: string, maxResults = 5, minThreshold = -Infinity): Promise<FileChunk[]> {
+    public async search(query: string, maxResults = 5, minThreshold = -Infinity): Promise<FileChunkWithScorer[]> {
         return this.rankChunks(query, this.chunks, maxResults);
     }
 
-    async rankChunks(query: string, chunks: FileChunk[], maxResults: number): Promise<FileChunk[]> {
+    async rankChunks(query: string, chunks: FileChunkWithScorer[], maxResults: number): Promise<FileChunkWithScorer[]> {
 
         const cachedQuery = this.embeddingsCache.get(query);
 
-        const fileChunksWithoutCachedEmbeddings: FileChunk[] = [];
+        const fileChunksWithoutCachedEmbeddings: FileChunkWithScorer[] = [];
         const fileChunksWithCachedEmbeddings: FileChunkWithEmbeddings[] = [];
         const cachedFileChunkEmbeddings = chunks.map(chunk => this.embeddingsCache.get(chunk.text));
 
@@ -90,7 +94,7 @@ export class EmbeddingsIndex {
             this.embeddingsCache.set(fileChunksWithoutCachedEmbeddings[i].text, e);
         }
 
-        const ranked = this.rankEmbeddings<FileChunk>(queryEmbedding, fileChunksWithEmbeddings, maxResults);
+        const ranked = this.rankEmbeddings<FileChunkWithScorer>(queryEmbedding, fileChunksWithEmbeddings, maxResults);
         return ranked;
 
     }
@@ -151,7 +155,7 @@ export class EmbeddingsIndex {
         return groups;
     }
 
-    rankEmbeddings<T>(
+    rankEmbeddings<T extends { scoreBonus?: number }>(
         queryEmbedding: Embedding,
         items: ReadonlyArray<readonly [T, Embedding]>,
         maxResults: number,
@@ -163,7 +167,8 @@ export class EmbeddingsIndex {
                 for (let i = 0; i < embedding.length; i++) {
                     dotProduct += embedding[i] * queryEmbedding[i];
                 }
-                return { score: dotProduct, item: item };
+                const bonus = item.scoreBonus ? item.scoreBonus : 0;
+                return { score: dotProduct + bonus, item: item };
             })
             .filter(entry => entry.score > minThreshold)
             .sort((a, b) => b.score - a.score)
@@ -171,4 +176,3 @@ export class EmbeddingsIndex {
             .map(entry => entry.item);
     }
 }
-

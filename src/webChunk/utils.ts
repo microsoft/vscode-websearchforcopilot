@@ -120,7 +120,6 @@ export class ResourceMap<T> implements Map<URI, T> {
 export interface FileChunk {
     readonly text: string;
     readonly file: URI;
-    // readonly scoreBoost: number;
 }
 
 export interface Page {

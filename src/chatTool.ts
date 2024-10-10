@@ -1,6 +1,7 @@
 import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolResult, workspace } from "vscode";
 import { SearchEngineManager } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
+import * as vscode from 'vscode';
 
 interface WebSearchToolParameters {
     query: string;
@@ -24,12 +25,22 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
             urls,
             options.parameters.query,
             {
-                tfidf: false,
                 crawl: false,
             },
             token
         );
 
+
+        const ret = chunks?.flatMap(c => c ? [
+            c.text,
+            '',
+            '-------------------',
+        ] : []).join('\n');
+
+        await vscode.workspace.openTextDocument({
+            language: 'markdown', // Specify the language mode
+            content: ret,
+        });
         return {
             'text/plain': `Here is some relevent context from webpages across the internet:\n ${JSON.stringify(chunks)}`
         };

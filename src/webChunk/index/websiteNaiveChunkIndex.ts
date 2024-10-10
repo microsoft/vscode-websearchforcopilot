@@ -1,8 +1,11 @@
 import { window, ProgressLocation, Uri, CancellationToken } from "vscode";
 import { naiveChunk } from "../chunker/chunker";
 import { crawl, scrape } from "../crawler/webCrawler";
-import { FileChunk, getDocumentFromPage } from "../utils";
-import { EmbeddingsCache, EmbeddingsIndex } from "./embeddings";
+import { FileChunk, getDocumentFromPage, ResourceMap } from "../utils";
+import { EmbeddingsCache, EmbeddingsIndex, FileChunkWithScorer } from "./embeddings";
+import * as vscode from 'vscode';
+
+const CHUNK_SIZE = 600;
 
 export class WebsiteEmbeddingsNaiveChunkIndex {
     private _loadPromise: Promise<EmbeddingsIndex>;
@@ -26,9 +29,12 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
     }
 
     private async _load() {
-        const embeddingsIndex = new EmbeddingsIndex(this.embeddingsCache);
+        const urlRankMap = new ResourceMap<number>();
+        this._urls.map((url, i) => urlRankMap.set(vscode.Uri.parse(url), i));
+        const embeddingsIndex = new EmbeddingsIndex(this.embeddingsCache, urlRankMap);
 
-        for (const url of this._urls) {
+        for (let i = 0; i < this._urls.length; i++) {
+            const url = this._urls[i];
             let result = await window.withProgress(
                 {
                     location: ProgressLocation.Notification,
@@ -41,18 +47,19 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
             );
 
 
-            const docs = new Array<FileChunk>;
+            const docs = new Array<FileChunkWithScorer>;
             for (const page of result) {
                 const vscodeUri = Uri.parse(page.url);
                 const document = getDocumentFromPage(page);
-                const fileChunks = new Array<FileChunk>();
+                const fileChunks = new Array<FileChunkWithScorer>();
 
-                const naiveChunks = naiveChunk(document, 400);
+                const naiveChunks = naiveChunk(document, CHUNK_SIZE);
                 for (const chunk of naiveChunks) {
                     fileChunks.push({
                         file: vscodeUri,
                         text: chunk,
-                    } satisfies FileChunk);
+                        scoreBonus: calculateURLBoost(i),
+                    } satisfies FileChunkWithScorer);
                 }
                 docs.push(...fileChunks);
             }
@@ -61,4 +68,8 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
         return embeddingsIndex;
     }
 
+}
+
+function calculateURLBoost(rank: number): number {
+    return (1 / (10 + rank));
 }
