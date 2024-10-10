@@ -29,6 +29,12 @@
 						"type": "boolean",
 						"default": false,
 						"description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks."
+					},
+					"websearch.preferredEngine": {
+						"type":"string",
+						"enum": ["tavily", "bing"],
+						"default": "tavily",
+						"description": "The preferred search engine to use for web search."
 					}
 				}
 			}
@@ -125,7 +131,7 @@
 				]
 			},
 			{
-				"id": "vscode-websearchparticipant_publicWebSearch",
+				"id": "vscode-websearchparticipant_webSearch",
 				"tags": [
 					"web",
 					"search",

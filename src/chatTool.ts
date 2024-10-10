@@ -1,29 +1,26 @@
-import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, lm, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
-import { getInternalTool } from "./tools";
-import { TavilyEngine } from "./search/webSearch";
-import { IWebSearchToolParameters } from "./search/webSearchTypes";
-import { scrape } from "./webChunk/crawler/webCrawler";
+import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolResult, workspace } from "vscode";
+import { SearchEngineManager } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 
-interface PublicWebSearchToolParameters {
+interface WebSearchToolParameters {
     query: string;
     api_key: string;
 }
 
-export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToolParameters> {
-    static ID = 'vscode-websearchparticipant_publicWebSearch';
+export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters> {
+    static ID = 'vscode-websearchparticipant_webSearch';
 
-    async invoke(options: LanguageModelToolInvocationOptions<PublicWebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
-        const results = await TavilyEngine.search(options.parameters.query);
+    async invoke(options: LanguageModelToolInvocationOptions<WebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
+        const results = await SearchEngineManager.search(options.parameters.query);
 
         if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {
             return {
-                'text/plain': JSON.stringify(results)
+                'text/plain': `Here is the response from the search engine:\n${JSON.stringify(results)}`
             };
         }
 
         const urls = results.urls.map(u => u.url);
-        const chucks = await findNaiveChunksBasedOnQuery(
+        const chunks = await findNaiveChunksBasedOnQuery(
             urls,
             options.parameters.query,
             {
@@ -34,7 +31,7 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
         );
 
         return {
-            'text/plain': JSON.stringify(chucks)
+            'text/plain': `Here is some relevent context from webpages across the internet:\n ${JSON.stringify(chunks)}`
         };
     }
 }

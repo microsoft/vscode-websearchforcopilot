@@ -38,31 +38,20 @@ export function registerWebSearch(context: vscode.ExtensionContext) {
 	}));
 }
 
+
 export class SearchEngineManager {
-
-	private searchEngine: ISearchEngine | undefined;
-
-	constructor() { }
-
-	public getEngine(): ISearchEngine {
-		if (!this.searchEngine) {
-			// TODO: prompt user for engine and set
-			throw new Error('Search engine not set.');
+	static async search(query: string): Promise<IWebSearchResults> {
+		const engineChoice = vscode.workspace.getConfiguration('websearch').get<'tavily' | 'bing'>('preferredEngine');
+		if (engineChoice === 'tavily') {
+			return await TavilyEngine.search(query);
+		} else {
+			return await BingEngine.search(query);
 		}
-		return this.searchEngine;
-	}
-
-	public search(query: string): Promise<IWebSearchResults> {
-		return this.getEngine().search(query);
 	}
 }
 
 
-export class TavilyEngine implements ISearchEngine {
-	search(query: string): Promise<IWebSearchResults> {
-		throw new Error('Method not implemented.');
-	}
-	extract?: ((params: ITavilyExtractParameters) => Promise<ITavilyExtractResponse>) | undefined;
+export class TavilyEngine {
 	static TAVILY_API_BASE_URL = 'https://api.tavily.com';
 
 	static async search(query: string, url?: string): Promise<IWebSearchResults> {
