@@ -21,6 +21,18 @@
 				"label": "Tavily"
 			}
 		],
+		"configuration": [
+			{
+				"title": "Web Search",
+				"properties": {
+					"websearch.useSearchResultsDirectly": {
+						"type": "boolean",
+						"default": false,
+						"description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks."
+					}
+				}
+			}
+		],
 		"commands": [
 			{
 				"command": "vscode-websearchparticipant.scrapeAndGetChunks",
