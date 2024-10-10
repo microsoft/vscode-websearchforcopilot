@@ -10,8 +10,46 @@ type FileChunkWithEmbeddings = [FileChunk, Embedding];
 const modelName = "text-embedding-3-small";
 const endpoint = "https://models.inference.ai.azure.com";
 
+// taken from stackoverflow : )
+// https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
+function stringHash(str: string): number {
+    var hash = 0,
+        i, chr;
+    if (str.length === 0) {
+        return hash;
+    }
+    for (i = 0; i < str.length; i++) {
+        chr = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+export class EmbeddingsCache {
+    private cache: Map<number, Embedding> = new Map<number, Embedding>();
+
+    public get(chunk: string): Embedding | undefined {
+
+        const ret = this.cache.get(stringHash(chunk));
+
+        if (!ret) {
+            console.log(`cache miss`);
+        } else {
+            console.log(`cache hit`);
+        }
+        return ret;
+    }
+
+    public set(chunk: string, embedding: Embedding) {
+        this.cache.set(stringHash(chunk), embedding);
+    }
+}
+
 export class EmbeddingsIndex {
     chunks: FileChunk[] = [];
+
+    constructor(private embeddingsCache: EmbeddingsCache) { }
 
     public add(documents: ReadonlyArray<FileChunk>): void {
         this.chunks.push(...documents);
@@ -23,19 +61,33 @@ export class EmbeddingsIndex {
 
     async rankChunks(query: string, chunks: FileChunk[], maxResults: number): Promise<FileChunk[]> {
 
-        const stringsToFetch = [
-            query,
-            ...chunks.map(chunk => chunk.text)
-        ];
+        const cachedQuery = this.embeddingsCache.get(query);
+
+        const fileChunksWithoutCachedEmbeddings: FileChunk[] = [];
+        const fileChunksWithCachedEmbeddings: FileChunkWithEmbeddings[] = [];
+        const cachedFileChunkEmbeddings = chunks.map(chunk => this.embeddingsCache.get(chunk.text));
+
+        for (let i = 0; i < cachedFileChunkEmbeddings.length; i++) {
+            const e = cachedFileChunkEmbeddings[i];
+            if (e) {
+                fileChunksWithCachedEmbeddings.push([chunks[i], e]);
+            } else {
+                fileChunksWithoutCachedEmbeddings.push(chunks[i]);
+            }
+        }
+
+        const stringsToFetch = cachedQuery ? [] : [query];
+        stringsToFetch.push(...fileChunksWithoutCachedEmbeddings.map(chunk => chunk.text));
+
         const embeddings = await this.getEmbeddings(stringsToFetch);
 
+        const fileChunksWithEmbeddings: FileChunkWithEmbeddings[] = Array.from(fileChunksWithCachedEmbeddings);
+        const queryEmbedding = cachedQuery ? cachedQuery : embeddings.shift() as Embedding;
 
-        const fileChunksWithEmbeddings: FileChunkWithEmbeddings[] = [];
-        const queryEmbedding = embeddings[0];
-        let i = 1;
-        for (const e of embeddings) {
-            fileChunksWithEmbeddings.push([chunks[i], e]);
-            i++;
+        for (let i = 0; i < embeddings.length; i++) {
+            const e = embeddings[i];
+            fileChunksWithEmbeddings.push([fileChunksWithoutCachedEmbeddings[i], e]);
+            this.embeddingsCache.set(fileChunksWithoutCachedEmbeddings[i].text, e);
         }
 
         const ranked = this.rankEmbeddings<FileChunk>(queryEmbedding, fileChunksWithEmbeddings, maxResults);

@@ -3,7 +3,7 @@ import { naiveChunk } from "../chunker/chunker";
 import { crawl, scrape } from "../crawler/webCrawler";
 import { getDocumentFromPage, IWebsiteIndex } from "./websiteBasicIndex";
 import { FileChunk } from "../utils";
-import { EmbeddingsIndex } from "./embeddings";
+import { EmbeddingsCache, EmbeddingsIndex } from "./embeddings";
 import { TfIdf, TfIdfDoc } from "./tfidf";
 
 
@@ -74,6 +74,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex implements IWebsiteIndex {
 
     constructor(
         private _urls: string[],
+        private embeddingsCache: EmbeddingsCache,
         private _crawl: boolean
     ) {
         this._loadPromise = this._load();
@@ -90,7 +91,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex implements IWebsiteIndex {
     }
 
     private async _load() {
-        const embeddingsIndex = new EmbeddingsIndex();
+        const embeddingsIndex = new EmbeddingsIndex(this.embeddingsCache);
 
         for (const url of this._urls) {
             let result = await window.withProgress(

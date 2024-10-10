@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { WebsiteIndex } from './index/websiteBasicIndex';
 import { WebsiteTFIDFNaiveChunkIndex, WebsiteEmbeddingsNaiveChunkIndex } from './index/websiteNaiveChunkIndex';
+import { EmbeddingsCache } from './index/embeddings';
 
 // todo: ideally, the index persists across queries.
 export async function findBasicChunksBasedOnQuery(url: string, query: string, maxResults = 5) {
@@ -9,13 +10,14 @@ export async function findBasicChunksBasedOnQuery(url: string, query: string, ma
     return await index.search(query, maxResults);
 }
 
+const embeddingsCache = new EmbeddingsCache();
 export async function findNaiveChunksBasedOnQuery(
     urls: string[],
     query: string,
     { tfidf, maxResults, crawl }: { tfidf: boolean, maxResults?: number, crawl: boolean },
     token?: vscode.CancellationToken,
 ) {
-    const index = tfidf ? new WebsiteTFIDFNaiveChunkIndex(urls, crawl) : new WebsiteEmbeddingsNaiveChunkIndex(urls, crawl);
+    const index = tfidf ? new WebsiteTFIDFNaiveChunkIndex(urls, crawl) : new WebsiteEmbeddingsNaiveChunkIndex(urls, embeddingsCache, crawl);
 
     return await index.search(query, maxResults ?? 5, token);
 }
