@@ -125,7 +125,7 @@
 				]
 			},
 			{
-				"id": "vscode-websearchparticipant_publicWebSearch",
+				"id": "vscode-websearchparticipant_webSearch",
 				"tags": [
 					"web",
 					"search",

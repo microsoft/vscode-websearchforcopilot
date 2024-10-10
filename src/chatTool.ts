@@ -2,15 +2,15 @@ import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOption
 import { TavilyEngine } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 
-interface PublicWebSearchToolParameters {
+interface WebSearchToolParameters {
     query: string;
     api_key: string;
 }
 
-export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToolParameters> {
-    static ID = 'vscode-websearchparticipant_publicWebSearch';
+export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters> {
+    static ID = 'vscode-websearchparticipant_webSearch';
 
-    async invoke(options: LanguageModelToolInvocationOptions<PublicWebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
+    async invoke(options: LanguageModelToolInvocationOptions<WebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
         const results = await TavilyEngine.search(options.parameters.query);
 
         if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {

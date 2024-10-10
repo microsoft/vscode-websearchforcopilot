@@ -3,7 +3,7 @@ import { BingAuthProvider, TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';
 import { registerWebSearch } from './search/webSearch';
 import { registerChatParticipant } from './chatParticipant';
-import { PublicWebSearchTool } from './chatTool';
+import { WebSearchTool } from './chatTool';
 import { registerScraperCommands } from './webChunk/registerTestScraperCommands';
 import { ChunkedWebContentTool } from './webChunk/chunkSearch';
 
@@ -45,7 +45,7 @@ function registerAuthProviders(context: vscode.ExtensionContext) {
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.lm.registerTool(PublicWebSearchTool.ID, new PublicWebSearchTool()));
+    context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool()));
     // todo: remove since this is just for invoking chunk search manually
     context.subscriptions.push(vscode.lm.registerTool(ChunkedWebContentTool.ID, new ChunkedWebContentTool()));
 }

@@ -1,5 +1,5 @@
 import { Location, LanguageModelToolResult, ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, LanguageModelChatMessage, chat, ThemeIcon, ChatPromptReference, Uri, workspace, ChatRequestTurn, ChatResponseTurn, ChatResponseMarkdownPart, ChatResponseAnchorPart, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelToolResultPart } from "vscode";
-import { PublicWebSearchTool } from "./chatTool";
+import { WebSearchTool } from "./chatTool";
 
 interface IToolCall {
     call: LanguageModelToolCallPart;
@@ -45,7 +45,7 @@ class WebSearchChatParticipant {
         messages.push(LanguageModelChatMessage.User(request.prompt));
 
         // Add the web search tool to the end of the list
-        const toolReferences = [...request.toolReferences.filter(t => t.id !== PublicWebSearchTool.ID), { id: PublicWebSearchTool.ID }];
+        const toolReferences = [...request.toolReferences.filter(t => t.id !== WebSearchTool.ID), { id: WebSearchTool.ID }];
         const runWithFunctions = async (): Promise<void> => {
             const requestedTool = toolReferences.shift();
             if (requestedTool) {
