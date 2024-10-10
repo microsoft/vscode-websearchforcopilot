@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { findBasicChunksBasedOnQuery, findNaiveChunksBasedOnQuery } from './chunkSearch';
-import { getDocumentFromPage, sectionToString, WebsiteIndex } from './index/websiteBasicIndex';
+import { findNaiveChunksBasedOnQuery } from './chunkSearch';
 import { TavilyEngine } from '../search/webSearch';
 
 export function registerScraperCommands(context: vscode.ExtensionContext) {
@@ -8,58 +7,11 @@ export function registerScraperCommands(context: vscode.ExtensionContext) {
 
     registerTavilyExtractor(context);
 
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetChunks', async () => {
-
-        const url = await promptForURL();
-        const query = await promptForQuery();
-
-        const resultChunks = await findBasicChunksBasedOnQuery(url, query);
-
-        await vscode.workspace.openTextDocument({
-            language: 'markdown', // Specify the language mode
-            content: resultChunks?.flatMap(c => [
-                '',
-                ...sectionToString({
-                    heading: c.heading,
-                    content: c.text
-                }
-                ),
-                '',
-                '-------------------',
-            ]).join('\n'),
-        });
-        console.log(resultChunks);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndOpenWholeDocument', async () => {
-        const url = await promptForURL();
-        const query = await promptForQuery();
-        await getAllPageContent(url, query);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetNaiveChunks', async () => {
-
-        const url = await promptForURL();
-        const query = await promptForQuery();
-        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, { tfidf: true, crawl: true });
-
-        await vscode.workspace.openTextDocument({
-            language: 'markdown', // Specify the language mode
-            content: resultChunks?.flatMap(c => [
-                '',
-                c.text,
-                '',
-                '-------------------',
-            ]).join('\n'),
-        });
-        console.log(resultChunks);
-    }));
-
     context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings', async () => {
 
         const url = await promptForURL();
         const query = await promptForQuery();
-        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, { tfidf: false, crawl: true });
+        const resultChunks = await findNaiveChunksBasedOnQuery([url], query, { crawl: true });
 
         await vscode.workspace.openTextDocument({
             language: 'markdown', // Specify the language mode
@@ -152,16 +104,4 @@ async function promptForQuery() {
     }
     return query;
 
-}
-
-async function getAllPageContent(url: string, query: string) {
-    const index = new WebsiteIndex(url);
-    const pages = await index.getAllChunks();
-
-    for (const page of pages) {
-        await vscode.workspace.openTextDocument({
-            language: 'markdown', // Specify the language mode
-            content: getDocumentFromPage(page),
-        });
-    }
 }

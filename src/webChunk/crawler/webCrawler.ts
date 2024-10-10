@@ -1,14 +1,5 @@
 import { JSDOM } from 'jsdom';
-
-export interface Page {
-    url: string;
-    sections: Section[];
-}
-
-export interface Section {
-    heading: string;
-    content: string;
-}
+import { Page, Section } from '../utils';
 
 function parse(url: string, document: Document): Page {
     // Result for the current page

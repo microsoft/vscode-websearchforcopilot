@@ -9,7 +9,7 @@
 	"categories": [
 		"Other"
 	],
-	"activationEvents": [],
+	"activationEvents": [ ],
 	"enabledApiProposals": [
 		"lmTools"
 	],
@@ -31,8 +31,8 @@
 						"description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks."
 					},
 					"websearch.preferredEngine": {
-						"type":"string",
-						"enum": ["tavily", "bing"],
+						"type": "string",
+						"enum": [ "tavily", "bing" ],
 						"default": "tavily",
 						"description": "The preferred search engine to use for web search."
 					}
@@ -41,24 +41,12 @@
 		],
 		"commands": [
 			{
-				"command": "vscode-websearchparticipant.scrapeAndGetChunks",
-				"title": "Scrape and Show Related Chunks Ranked by TF-IDF"
-			},
-			{
-				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunks",
-				"title": "Scrape and Show Related Naive Chunks Ranked by TF-IDF"
-			},
-			{
 				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
 				"title": "Scrape and Show Related Naive Chunks Ranked by Embeddings"
 			},
 			{
 				"command": "vscode-websearchparticipant.tavilyScrapeAndGetChunks",
 				"title": "Scrape and Show Related Tavily Chunks"
-			},
-			{
-				"command": "vscode-websearchparticipant.scrapeAndOpenWholeDocument",
-				"title": "Scrape and Open Info As Document"
 			},
 			{
 				"command": "vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",

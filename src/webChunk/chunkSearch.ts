@@ -1,23 +1,15 @@
 import * as vscode from 'vscode';
-import { WebsiteIndex } from './index/websiteBasicIndex';
-import { WebsiteTFIDFNaiveChunkIndex, WebsiteEmbeddingsNaiveChunkIndex } from './index/websiteNaiveChunkIndex';
+import { WebsiteEmbeddingsNaiveChunkIndex } from './index/websiteNaiveChunkIndex';
 import { EmbeddingsCache } from './index/embeddings';
-
-// todo: ideally, the index persists across queries.
-export async function findBasicChunksBasedOnQuery(url: string, query: string, maxResults = 5) {
-    const index = new WebsiteIndex(url);
-
-    return await index.search(query, maxResults);
-}
 
 const embeddingsCache = new EmbeddingsCache();
 export async function findNaiveChunksBasedOnQuery(
     urls: string[],
     query: string,
-    { tfidf, maxResults, crawl }: { tfidf: boolean, maxResults?: number, crawl: boolean },
+    { maxResults, crawl }: { maxResults?: number, crawl: boolean },
     token?: vscode.CancellationToken,
 ) {
-    const index = tfidf ? new WebsiteTFIDFNaiveChunkIndex(urls, crawl) : new WebsiteEmbeddingsNaiveChunkIndex(urls, embeddingsCache, crawl);
+    const index = new WebsiteEmbeddingsNaiveChunkIndex(urls, embeddingsCache, crawl);
 
     return await index.search(query, maxResults ?? 5, token);
 }
@@ -58,7 +50,6 @@ export class ChunkedWebContentTool implements vscode.LanguageModelTool<IChunkedW
             urls,
             options.parameters.query,
             {
-                tfidf: false,
                 crawl: true
             },
             token

@@ -120,4 +120,34 @@ export class ResourceMap<T> implements Map<URI, T> {
 export interface FileChunk {
     readonly text: string;
     readonly file: URI;
+    // readonly scoreBoost: number;
+}
+
+export interface Page {
+    url: string;
+    sections: Section[];
+}
+
+export interface Section {
+    heading: string;
+    content: string;
+}
+
+export function getDocumentFromPage(page: Page): string {
+    const strBuffer: string[] = [page.url, ''];
+
+    for (const p of page.sections) {
+        strBuffer.push(...sectionToString(p));
+    }
+
+    return strBuffer.join('\n');
+}
+
+export function sectionToString(section: Section): string[] {
+    const strBuffer: string[] = [];
+    strBuffer.push(`# ${section.heading}`);
+    strBuffer.push(section.content);
+    strBuffer.push(`\n`);
+    return strBuffer;
+
 }
