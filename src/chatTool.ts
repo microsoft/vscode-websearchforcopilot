@@ -20,7 +20,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
         }
 
         const urls = results.urls.map(u => u.url);
-        const chucks = await findNaiveChunksBasedOnQuery(
+        const chunks = await findNaiveChunksBasedOnQuery(
             urls,
             options.parameters.query,
             {
@@ -31,7 +31,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
         );
 
         return {
-            'text/plain': `Here is some relevent context from webpages across the internet:\n ${JSON.stringify(chucks)}`
+            'text/plain': `Here is some relevent context from webpages across the internet:\n ${JSON.stringify(chunks)}`
         };
     }
 }
