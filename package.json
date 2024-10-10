@@ -32,7 +32,10 @@
 					},
 					"websearch.preferredEngine": {
 						"type": "string",
-						"enum": [ "tavily", "bing" ],
+						"enum": [
+							"tavily",
+							"bing"
+						],
 						"default": "tavily",
 						"description": "The preferred search engine to use for web search."
 					}
@@ -180,6 +183,7 @@
 		"@azure/core-sse": "latest",
 		"@microsoft/tiktokenizer": "^1.0.8",
 		"@types/jsdom": "^21.1.6",
+		"@vscode/prompt-tsx": "^0.3.0-alpha.2",
 		"cheerio": "^1.0.0-rc.12",
 		"jsdom": "^24.0.0"
 	}
