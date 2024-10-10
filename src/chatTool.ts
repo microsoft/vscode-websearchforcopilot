@@ -18,7 +18,7 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
 
         if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {
             return {
-                'text/plain': JSON.stringify(results)
+                'text/plain': `Here is the response from the search engine:\n${JSON.stringify(results)}`
             };
         }
 
@@ -34,7 +34,7 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
         );
 
         return {
-            'text/plain': JSON.stringify(chucks)
+            'text/plain': `Here is some relevent context from webpages across the internet:\n ${JSON.stringify(chucks)}`
         };
     }
 }
