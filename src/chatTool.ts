@@ -1,8 +1,5 @@
-import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, lm, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
-import { getInternalTool } from "./tools";
+import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolResult, workspace } from "vscode";
 import { TavilyEngine } from "./search/webSearch";
-import { IWebSearchToolParameters } from "./search/webSearchTypes";
-import { scrape } from "./webChunk/crawler/webCrawler";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 
 interface PublicWebSearchToolParameters {
