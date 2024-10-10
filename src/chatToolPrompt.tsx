@@ -51,7 +51,7 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
     }
 }
 
-interface ToolCallsProps extends BasePromptElementProps {
+export interface ToolCallsProps extends BasePromptElementProps {
     toolCalls: vscode.LanguageModelToolCallPart[];
     toolInvocationToken: vscode.ChatParticipantToolToken;
 }
@@ -87,7 +87,7 @@ interface ToolCallProps extends BasePromptElementProps {
 const agentSupportedContentTypes = [promptTsxContentType, 'text/plain'];
 
 const dummyCancellationToken: vscode.CancellationToken = new vscode.CancellationTokenSource().token;
-class ToolCall extends PromptElement<ToolCallProps, void> {
+export class ToolCall extends PromptElement<ToolCallProps, void> {
     async render(state: void, sizing: PromptSizing) {
         const contentType = agentSupportedContentTypes.find(type => this.props.tool.supportedContentTypes.includes(type));
         if (!contentType) {

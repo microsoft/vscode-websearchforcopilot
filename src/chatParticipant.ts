@@ -75,8 +75,8 @@ class WebSearchChatParticipant {
                     ToolUserPrompt,
                     {
                         context: chatContext,
-                        request,
-                        toolCalls,
+                        request: request,
+                        toolCalls: toolCalls,
                     },
                     { modelMaxPromptTokens: model.maxInputTokens },
                     model)).messages;
