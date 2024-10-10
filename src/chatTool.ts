@@ -1,4 +1,4 @@
-import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, lm, PreparedToolInvocation, ProviderResult } from "vscode";
+import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, lm, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
 import { getInternalTool } from "./tools";
 import { TavilyEngine } from "./search/webSearch";
 import { IWebSearchToolParameters } from "./search/webSearchTypes";
@@ -16,6 +16,12 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
     async invoke(options: LanguageModelToolInvocationOptions<PublicWebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
         const results = await TavilyEngine.search(options.parameters.query);
 
+        if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {
+            return {
+                'text/plain': JSON.stringify(results)
+            };
+        }
+
         const urls = results.urls.map(u => u.url);
         const chucks = await findNaiveChunksBasedOnQuery(
             urls,
@@ -27,14 +33,8 @@ export class PublicWebSearchTool implements LanguageModelTool<PublicWebSearchToo
             token
         );
 
-        // TODO: Have the language model take in the result of the internal tool and run other internal tools
-        // const models = await lm.selectChatModels({
-        //     vendor: 'copilot',
-        //     family: 'gpt-4o'
-        // });
-        // const model = models[0];
         return {
-            'plain/text': JSON.stringify(chucks)
+            'text/plain': JSON.stringify(chucks)
         };
     }
 }
