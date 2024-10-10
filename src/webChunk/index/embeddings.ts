@@ -69,7 +69,8 @@ export class EmbeddingsIndex {
         const inputs = Array.from(text);
         const ret = [];
 
-        const groups = await this.batchChunksIntoGroups(inputs, 4096); // taken around half of the token window
+        const groups = await this.batchChunksIntoGroups(inputs, 50000); // limit ~64k
+
         for (const group of groups) {
             ret.push(...await sendReq(group));
         }
