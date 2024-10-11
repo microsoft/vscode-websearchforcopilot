@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { CancellationToken, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolResult, workspace } from "vscode";
+import { CancellationToken, l10n, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
 import { SearchEngineManager } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 import {
@@ -30,6 +30,12 @@ interface WebSearchToolProps extends BasePromptElementProps {
 
 export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters> {
     static ID = 'vscode-websearchparticipant_webSearch';
+    
+    prepareToolInvocation(options: LanguageModelToolInvocationPrepareOptions<WebSearchToolParameters>, token: CancellationToken): ProviderResult<PreparedToolInvocation> {
+        return {
+            invocationMessage: l10n.t("Searching the web for '{0}'", options.parameters.query)
+        };
+    }
 
     async invoke(options: LanguageModelToolInvocationOptions<WebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
         const results = await SearchEngineManager.search(options.parameters.query);
