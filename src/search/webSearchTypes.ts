@@ -3,12 +3,6 @@ export interface ISearchEngine {
 	extract?: (params: ITavilyExtractParameters) => Promise<ITavilyExtractResponse>;
 }
 
-export interface IWebSearchToolParameters {
-	api_key: string;
-	query: string;
-	urls?: string[];
-}
-
 export interface IWebSearchResults {
 	urls: {
 		url: string;
