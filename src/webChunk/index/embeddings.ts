@@ -38,15 +38,7 @@ export class EmbeddingsCache {
     private cache: Map<number, Embedding> = new Map<number, Embedding>();
 
     public get(chunk: string): Embedding | undefined {
-
-        const ret = this.cache.get(stringHash(chunk));
-
-        if (!ret) {
-            console.log(`cache miss`);
-        } else {
-            console.log(`cache hit`);
-        }
-        return ret;
+        return this.cache.get(stringHash(chunk));
     }
 
     public set(chunk: string, embedding: Embedding) {
@@ -135,7 +127,6 @@ export class EmbeddingsIndex {
             ret.push(...await sendReq(group));
         }
 
-        console.log(`sent ${groups.length} embeddings calls`);
         return ret;
     }
 

@@ -65,7 +65,7 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
             {this.props.toolCalls.map(toolCall => {
                 const tool = vscode.lm.tools.find(t => t.id === toolCall.name);
                 if (!tool) {
-                    console.error(vscode.l10n.t(`Tool not found: ${toolCall.name}`));
+                    console.error(vscode.l10n.t('Tool not found: {0}', toolCall.name));
                     return undefined;
                 }
 
@@ -89,7 +89,7 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
     async render(state: void, sizing: PromptSizing) {
         const contentType = agentSupportedContentTypes.find(type => this.props.tool.supportedContentTypes.includes(type));
         if (!contentType) {
-            console.error(vscode.l10n.t(`Tool does not support any of the agent's content types: ${this.props.tool.id}`));
+            console.error(vscode.l10n.t('Tool does not support any of the agent\'s content types: {0}', this.props.tool.id));
             return <ToolMessage toolCallId={this.props.toolCall.toolCallId}>Tool unsupported</ToolMessage>;
         }
 
@@ -217,7 +217,7 @@ export class Tag extends PromptElement<TagProps> {
         const { name } = this.props;
 
         if (!Tag._regex.test(name)) {
-            throw new Error(vscode.l10n.t(`Invalid tag name: ${this.props.name}`));
+            throw new Error(vscode.l10n.t('Invalid tag name: {0}', name));
         }
 
         return (

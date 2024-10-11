@@ -40,11 +40,12 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 	async createSession(_scopes: string[]): Promise<AuthenticationSession> {
 		const input = window.createInputBox();
 		input.totalSteps = 2;
-		input.title = l10n.t(`${this.name} Login`);
+		input.title = l10n.t('{0} Login', this.name);
 
 		// Get API Key
 		input.step = 1;
-		input.placeholder = l10n.t(`Enter your ${this.name} API key`);
+		const placeholderText = l10n.t('Enter your {0} API key', this.name);
+		input.placeholder = placeholderText;
 		input.ignoreFocusOut = true;
 		if (this.createKeyUrl) {
 			const createKeyUrl = this.createKeyUrl;
