@@ -2,12 +2,11 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { window, ProgressLocation, Uri, CancellationToken } from "vscode";
+import { window, ProgressLocation, Uri, CancellationToken, l10n } from "vscode";
 import { naiveChunk } from "../chunker/chunker";
 import { crawl, scrape } from "../crawler/webCrawler";
 import { FileChunk, getDocumentFromPage, ResourceMap } from "../utils";
 import { EmbeddingsCache, EmbeddingsIndex, FileChunkWithScorer } from "./embeddings";
-import * as vscode from 'vscode';
 
 const CHUNK_SIZE = 600;
 
@@ -34,7 +33,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
 
     private async _load() {
         const urlRankMap = new ResourceMap<number>();
-        this._urls.map((url, i) => urlRankMap.set(vscode.Uri.parse(url), i));
+        this._urls.map((url, i) => urlRankMap.set(Uri.parse(url), i));
         const embeddingsIndex = new EmbeddingsIndex(this.embeddingsCache, urlRankMap);
 
         for (let i = 0; i < this._urls.length; i++) {
@@ -42,7 +41,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
             let result = await window.withProgress(
                 {
                     location: ProgressLocation.Notification,
-                    title: vscode.l10n.t('Crawling, Indexing, and Chunking {0}', url)
+                    title: l10n.t('Crawling, Indexing, and Chunking {0}', url)
                 },
                 async (_) => {
                     const result = this._crawl ? await crawl(url) : [await scrape(url)];
