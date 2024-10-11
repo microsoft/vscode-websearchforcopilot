@@ -1,7 +1,8 @@
 {
 	"name": "vscode-websearchparticipant",
+	"publisher": "ms-vscode",
 	"displayName": "Web Search Chat Participant",
-	"description": "",
+	"description": "Search the web from within chat",
 	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.94.0"
