@@ -28,17 +28,17 @@ export class ChunkedWebContentTool implements vscode.LanguageModelTool<IChunkedW
 
     static DETAILS: vscode.LanguageModelChatTool = {
         name: ChunkedWebContentTool.ID,
-        description: 'Gets the relevant chunks from certain websites based on a query',
+        description: vscode.l10n.t('Gets the relevant chunks from certain websites based on a query'),
         parametersSchema: {
             type: "object",
             properties: {
                 query: {
                     type: "string",
-                    description: "Search for content on these websites based on this query"
+                    description: vscode.l10n.t("Search for content on these websites based on this query")
                 },
                 urls: {
                     type: "string",
-                    description: "The URLs to search for content on, separated by commas"
+                    description: vscode.l10n.t("The URLs to search for content on, separated by commas")
                 }
             },
             required: ["query", "urls"]

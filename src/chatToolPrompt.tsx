@@ -59,16 +59,13 @@ export interface ToolCallsProps extends BasePromptElementProps {
 
 class ToolCalls extends PromptElement<ToolCallsProps, void> {
     render(state: void, sizing: PromptSizing) {
-        // TODO- prompt-tsx export this type?
-        // TODO- at what level do the parameters get stringified?
         const assistantToolCalls: any[] = this.props.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.parameters) }, id: tc.toolCallId }));
-        // TODO@prompt-tsx- don't remove "empty" assistant messages!
         return <>
             <AssistantMessage toolCalls={assistantToolCalls}>todo</AssistantMessage>
             {this.props.toolCalls.map(toolCall => {
                 const tool = vscode.lm.tools.find(t => t.id === toolCall.name);
                 if (!tool) {
-                    console.error(`Tool not found: ${toolCall.name}`);
+                    console.error(vscode.l10n.t(`Tool not found: ${toolCall.name}`));
                     return undefined;
                 }
 
@@ -92,7 +89,7 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
     async render(state: void, sizing: PromptSizing) {
         const contentType = agentSupportedContentTypes.find(type => this.props.tool.supportedContentTypes.includes(type));
         if (!contentType) {
-            console.error(`Tool does not support any of the agent's content types: ${this.props.tool.id}`);
+            console.error(vscode.l10n.t(`Tool does not support any of the agent's content types: ${this.props.tool.id}`));
             return <ToolMessage toolCallId={this.props.toolCall.toolCallId}>Tool unsupported</ToolMessage>;
         }
 
@@ -220,7 +217,7 @@ export class Tag extends PromptElement<TagProps> {
         const { name } = this.props;
 
         if (!Tag._regex.test(name)) {
-            throw new Error(`Invalid tag name: ${this.props.name}`);
+            throw new Error(vscode.l10n.t(`Invalid tag name: ${this.props.name}`));
         }
 
         return (

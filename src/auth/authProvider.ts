@@ -158,7 +158,6 @@ export class BingAuthProvider extends BaseAuthProvider {
 
 	protected readonly createKeyUrl = 'https://portal.azure.com/#browse/Microsoft.Bing%2Faccounts';
 
-	// TODO
 	protected async validateKey(key: string): Promise<boolean> {
 		try {
 			const req = await fetch(

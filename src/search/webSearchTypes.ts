@@ -2,10 +2,6 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-export interface ISearchEngine {
-	search(query: string): Promise<IWebSearchResults>;
-	extract?: (params: ITavilyExtractParameters) => Promise<ITavilyExtractResponse>;
-}
 
 export interface IWebSearchResults {
 	urls: {

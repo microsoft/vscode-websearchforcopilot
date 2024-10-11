@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri } from "vscode";
+import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri, l10n } from "vscode";
 import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
@@ -27,7 +27,7 @@ class WebSearchChatParticipant {
         });
 
         const options: LanguageModelChatRequestOptions = {
-            justification: 'To parse web search results and summarize an answer',
+            justification: l10n.t('To parse web search results and summarize an answer'),
         };
         let { messages, references } = await renderPrompt(
             ToolUserPrompt,

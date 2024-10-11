@@ -2,46 +2,9 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 import * as vscode from 'vscode';
-import { ITavilySearchOptions, IWebSearchResults, ITavilyExtractParameters, ITavilyExtractResponse, ISearchEngine } from './webSearchTypes';
-
-export function registerWebSearch(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.tavilySearch', async () => {
-		const query = await vscode.window.showInputBox({
-			prompt: 'Enter your search query',
-			placeHolder: 'Search...',
-		});
-
-		if (!query) {
-			vscode.window.showErrorMessage('Search query cannot be empty.');
-			return;
-		}
-
-		const domain = await vscode.window.showInputBox({
-			prompt: 'Enter the domain to search within',
-			placeHolder: 'example.com',
-		});
-
-		const result = await TavilyEngine.search(query, domain);
-		console.log(result);
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchparticipant.bingSearch', async () => {
-		const query = await vscode.window.showInputBox({
-			prompt: 'Enter your search query',
-			placeHolder: 'Search...',
-		});
-
-		if (!query) {
-			vscode.window.showErrorMessage('Search query cannot be empty.');
-			return;
-		}
-
-		const result = await BingEngine.search(query);
-		console.log(result);
-	}));
-}
-
+import { ITavilySearchOptions, IWebSearchResults, ITavilyExtractParameters, ITavilyExtractResponse } from './webSearchTypes';
 
 export class SearchEngineManager {
 	static async search(query: string): Promise<IWebSearchResults> {

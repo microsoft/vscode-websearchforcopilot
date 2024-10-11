@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { Event, EventEmitter, ExtensionContext, SecretStorage, SecretStorageChangeEvent } from 'vscode';
+import { Event, EventEmitter, ExtensionContext, SecretStorage, SecretStorageChangeEvent, l10n } from 'vscode';
 
 export interface IDidChangeInOtherWindowEvent<T> {
 	added: string[];
@@ -60,7 +60,7 @@ export class BetterTokenStorage<T> {
 							} else if (p.status === 'rejected') {
 								console.error(p.reason);
 							} else {
-								console.error('Key was not found in SecretStorage.');
+								console.error(l10n.t('Key was not found in SecretStorage.'));
 							}
 						});
 						resolve(tokens);
