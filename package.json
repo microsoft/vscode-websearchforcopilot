@@ -147,7 +147,8 @@
 					]
 				},
 				"supportedContentTypes": [
-					"text/plain"
+					"text/plain",
+					"application/vnd.codechat.prompt+json.1"
 				]
 			}
 		]

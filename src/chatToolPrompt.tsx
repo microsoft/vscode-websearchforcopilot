@@ -23,21 +23,22 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
         return (
             <>
                 <UserMessage priority={50}>
-                    Instructions: <br />
+                    Instructions:<br />
                     - The user will ask a question, or ask you to perform a task, and it may
                     require lots of research to answer correctly. There is a selection of
                     tools that let you perform actions or retrieve helpful context to answer
-                    the user's question. <br />
+                    the user's question.<br />
                     - If you aren't sure which tool is relevant, you can call multiple
                     tools. You can call tools repeatedly to take actions or gather as much
                     context as needed until you have completed the task fully. Don't give up
                     unless you are sure the request cannot be fulfilled with the tools you
-                    have. <br />
+                    have.<br />
                     - Don't make assumptions about the situation- gather context first, then
                     perform the task or answer the question. <br />
-                    - Don't ask the user for confirmation to use tools, just use them.
-                    <br />- After editing a file, DO NOT show the user a codeblock with the
-                    edit or new file contents. Assume that the user can see the result.
+                    - Don't ask the user for confirmation to use tools, just use them.<br />
+                    - After editing a file, DO NOT show the user a codeblock with the
+                    edit or new file contents. Assume that the user can see the result.<br />
+                    - DO NOT CALL multi_tool_use.parallel FOR ANY REASON. This is a special tool for internal use only.
                 </UserMessage>
                 <History context={this.props.context} priority={20}></History>
                 <PromptReferences

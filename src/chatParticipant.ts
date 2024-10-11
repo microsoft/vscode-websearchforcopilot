@@ -1,6 +1,7 @@
 import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool } from "vscode";
 import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
+import { WebSearchTool } from "./chatTool";
 
 const llmInstructions = `Instructions:
 - The user will ask a question, or ask you to perform a task, and it may require lots of research to answer correctly. There is a selection of tools that let you perform actions or retrieve helpful context to answer the user's question.
@@ -43,7 +44,7 @@ class WebSearchChatParticipant {
             { modelMaxPromptTokens: model.maxInputTokens },
             model);
 
-        const toolReferences = [...request.toolReferences];
+        const toolReferences = [...request.toolReferences.filter(ref => ref.id === WebSearchTool.ID), { id: WebSearchTool.ID }];
         const runWithFunctions = async (): Promise<void> => {
             const requestedTool = toolReferences.shift();
             if (requestedTool) {
