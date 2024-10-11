@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
 import { BingAuthProvider, TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';

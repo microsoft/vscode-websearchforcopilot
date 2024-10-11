@@ -1,3 +1,7 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri } from "vscode";
 import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
