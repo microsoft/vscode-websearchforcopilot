@@ -1,8 +1,8 @@
 {
-	"name": "vscode-websearchparticipant",
+	"name": "vscode-websearchchattools",
 	"publisher": "ms-vscode",
-	"displayName": "Web Search Chat Participant",
-	"description": "Search the web from within chat",
+	"displayName": "Web Search for Copilot",
+	"description": "Search the web right from chat",
 	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.94.0"
@@ -55,44 +55,22 @@
 				"name": "websearch",
 				"description": "%chatParticipant.websearch.description%",
 				"isSticky": true,
+				"disambiguation": [
+					{
+						"category": "web_questions",
+						"description": "This provides up-to-date and relevant information from the web. You'll want to use this if you think the user wants:\n* something directly from the internet\n*a topic that is brand new that you don't know about\n*a topic that is changing rapidly that your knowledge might be out of date",
+						"examples": [
+							"When was Workspace Trust released? https://code.visualstudio.com/updates",
+							"Can I use the screen capture API on Firefox 60?",
+							"What are people saying about the latest Source Control Graph feature in VS Code?",
+							"who is Moo Deng?"
+						]
+					}
+				],
 				"supportsToolReferences": true
 			}
 		],
 		"languageModelTools": [
-			{
-				"id": "vscode-websearchparticipant_chunkedWebContent",
-				"tags": [
-					"web",
-					"search",
-					"vscode-websearchparticipant"
-				],
-				"displayName": "%lmTool.chunkedWebContent.displayName%",
-				"canBeInvokedManually": true,
-				"name": "chunkedWebContent",
-				"icon": "search",
-				"userDescription": "%lmTool.chunkedWebContent.userDescription%",
-				"modelDescription": "%lmTool.chunkedWebContent.modelDescription%",
-				"parametersSchema": {
-					"type": "object",
-					"properties": {
-						"query": {
-							"type": "string",
-							"description": "%lmTool.chunkedWebContent.query.description%"
-						},
-						"urls": {
-							"type": "string",
-							"description": "%lmTool.chunkedWebContent.urls.description%"
-						}
-					},
-					"required": [
-						"query",
-						"urls"
-					]
-				},
-				"supportedContentTypes": [
-					"text/plain"
-				]
-			},
 			{
 				"id": "vscode-websearchparticipant_webSearch",
 				"tags": [

@@ -1,23 +1,43 @@
-## Running the Sample
+## Web Search for Copilot
 
-- Run `npm install` in terminal to install dependencies
-- Run the `Run Extension` target in the Debug View. This will:
-	- Start a task `npm: watch` to compile the code
-	- Run the extension in a new VS Code window
+Get the most up-to-date and relevant information from the web right in Copilot.
 
-## Contributing
+This is powered by one of two different Search Engines:
+* Tavily (default)
+* Bing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+You can configure this with the `websearch.preferredEngine` setting. ([VS Code deeplink](vscode://settings/websearch.preferredEngine), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.preferredEngine))
 
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+You'll need to acquire an API key from one of these services to use this extension. Upon first use, it will ask you for that key and store it using VS Code's built-in secret storage, and can be managed via VS Code's authentication stack as well just as you would for your GitHub account.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+### Chat Participant
+
+This extension contributes the
+`@websearch`
+chat participant which is capable of handling questions that likely need live information from the internet.
+You can invoke it manually using
+`@websearch when did Workspace Trust ship in vscode?`
+or if you have intent detection enabled,
+it will get picked up automatically for web-related questions.
+
+### Chat Tool
+
+This extension contributes the
+`#websearch`
+chat tool as well which is similar to the participant but is useful for providing context from the web in other chat participants.
+For example:
+* `@workspace /new #websearch create a new web app written in Python using the most popular framework`
+
+Additionally,
+if you are working on your own Chat Particpant or Tool,
+you can consume this Chat Tool via the
+`vscode.lm.invokeTool`
+API.
+
+### Settings
+
+* `websearch.preferredEngine` ([VS Code deeplink](vscode://settings/websearch.preferredEngine), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.preferredEngine)) - Configure the desired search engine.
+* `websearch.useSearchResultsDirectly` ([VS Code deeplink](vscode://settings/websearch.useSearchResultsDirectly), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.useSearchResultsDirectly)) - Skip the post processing of search results and use raw search results from the search engine instead.
 
 ## Trademarks
 
