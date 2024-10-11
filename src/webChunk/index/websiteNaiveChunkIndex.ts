@@ -42,7 +42,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
             let result = await window.withProgress(
                 {
                     location: ProgressLocation.Notification,
-                    title: vscode.l10n.t(`Crawling, Indexing, and Chunking ${url}`)
+                    title: vscode.l10n.t('Crawling, Indexing, and Chunking {0}', url)
                 },
                 async (_) => {
                     const result = this._crawl ? await crawl(url) : [await scrape(url)];
