@@ -1,5 +1,7 @@
-//@ts-check
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 'use strict';
 
 const path = require('path');
@@ -20,12 +22,17 @@ const extensionConfig = {
     libraryTarget: 'commonjs2'
   },
   externals: {
-    vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
     // modules added here also need to be added in the .vscodeignore file
+    canvas: 'commonjs canvas' // we don't want to support canvas elements so just allow the require to throw
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.js', '.tsx']
+    extensions: ['.ts', '.js', '.tsx'],
+    alias: {
+      bufferutil: false,
+      'utf-8-validate': false
+    },
   },
   module: {
     rules: [

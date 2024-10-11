@@ -27,7 +27,7 @@ class WebSearchChatParticipant {
         });
 
         const options: LanguageModelChatRequestOptions = {
-            justification: l10n.t('To parse web search results and summarize an answer'),
+            justification: l10n.t('To analyze web search results and summarize an answer'),
         };
         let { messages, references } = await renderPrompt(
             ToolUserPrompt,
