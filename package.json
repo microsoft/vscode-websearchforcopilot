@@ -47,40 +47,7 @@
 				}
 			}
 		],
-		"commands": [
-			{
-				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
-				"title": "%command.scrapeAndGetNaiveChunks.title%"
-			},
-			{
-				"command": "vscode-websearchparticipant.tavilyScrapeAndGetChunks",
-				"title": "%command.tavilyScrapeAndGetChunks.title%"
-			},
-			{
-				"command": "vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",
-				"title": "%command.tavilyScrapeAndOpenWholeDocument.title%"
-			},
-			{
-				"title": "%command.tavilyHi.title%",
-				"command": "tavily-authentication-provider.hi",
-				"category": "Tavily"
-			},
-			{
-				"title": "%command.bingHi.title%",
-				"command": "bing-authentication-provider.hi",
-				"category": "Bing"
-			},
-			{
-				"title": "%command.tavilySearch.title%",
-				"command": "vscode-websearchparticipant.tavilySearch",
-				"category": "Web Search"
-			},
-			{
-				"title": "%command.bingSearch.title%",
-				"command": "vscode-websearchparticipant.bingSearch",
-				"category": "Web Search"
-			}
-		],
+		"commands": [],
 		"chatParticipants": [
 			{
 				"id": "vscode-websearchparticipant.websearch",
