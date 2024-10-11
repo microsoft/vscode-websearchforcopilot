@@ -1,6 +1,6 @@
 {
 	"name": "vscode-websearchparticipant",
-	"displayName": "vscode-websearchparticipant",
+	"displayName": "Web Search Chat Participant",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
@@ -19,16 +19,20 @@
 			{
 				"id": "tavily",
 				"label": "Tavily"
+			},
+			{
+				"id": "bing",
+				"label": "Bing"
 			}
 		],
 		"configuration": [
 			{
-				"title": "Web Search",
+				"title": "%configuration.webSearch.title%",
 				"properties": {
 					"websearch.useSearchResultsDirectly": {
 						"type": "boolean",
 						"default": false,
-						"description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks."
+						"description": "%config.useSearchResultsDirectly.description%"
 					},
 					"websearch.preferredEngine": {
 						"type": "string",
@@ -37,7 +41,7 @@
 							"bing"
 						],
 						"default": "tavily",
-						"description": "The preferred search engine to use for web search."
+						"description": "%config.preferredEngine.description%"
 					}
 				}
 			}
@@ -45,33 +49,33 @@
 		"commands": [
 			{
 				"command": "vscode-websearchparticipant.scrapeAndGetNaiveChunksFromEmbeddings",
-				"title": "Scrape and Show Related Naive Chunks Ranked by Embeddings"
+				"title": "%command.scrapeAndGetNaiveChunks.title%"
 			},
 			{
 				"command": "vscode-websearchparticipant.tavilyScrapeAndGetChunks",
-				"title": "Scrape and Show Related Tavily Chunks"
+				"title": "%command.tavilyScrapeAndGetChunks.title%"
 			},
 			{
 				"command": "vscode-websearchparticipant.tavilyScrapeAndOpenWholeDocument",
-				"title": "Tavily Extract and Open Info As Document"
+				"title": "%command.tavilyScrapeAndOpenWholeDocument.title%"
 			},
 			{
-				"title": "Hi",
+				"title": "%command.tavilyHi.title%",
 				"command": "tavily-authentication-provider.hi",
 				"category": "Tavily"
 			},
 			{
-				"title": "Hi",
+				"title": "%command.bingHi.title%",
 				"command": "bing-authentication-provider.hi",
 				"category": "Bing"
 			},
 			{
-				"title": "Tavily Search",
+				"title": "%command.tavilySearch.title%",
 				"command": "vscode-websearchparticipant.tavilySearch",
 				"category": "Web Search"
 			},
 			{
-				"title": "Bing Search",
+				"title": "%command.bingSearch.title%",
 				"command": "vscode-websearchparticipant.bingSearch",
 				"category": "Web Search"
 			}
@@ -79,9 +83,9 @@
 		"chatParticipants": [
 			{
 				"id": "vscode-websearchparticipant.websearch",
-				"fullName": "Web Search",
+				"fullName": "%chatParticipant.websearch.fullName%",
 				"name": "websearch",
-				"description": "Search the web for relevant up-to-date information",
+				"description": "%chatParticipant.websearch.description%",
 				"isSticky": true,
 				"supportsToolReferences": true
 			}
@@ -94,22 +98,22 @@
 					"search",
 					"vscode-websearchparticipant"
 				],
-				"displayName": "Chunked Web Content",
+				"displayName": "%lmTool.chunkedWebContent.displayName%",
 				"canBeInvokedManually": true,
 				"name": "chunkedWebContent",
 				"icon": "search",
-				"userDescription": "Find relevant content on webpages",
-				"modelDescription": "From a list of webpages, find relevant content based on a query",
+				"userDescription": "%lmTool.chunkedWebContent.userDescription%",
+				"modelDescription": "%lmTool.chunkedWebContent.modelDescription%",
 				"parametersSchema": {
 					"type": "object",
 					"properties": {
 						"query": {
 							"type": "string",
-							"description": "Search for content on these websites based on this query"
+							"description": "%lmTool.chunkedWebContent.query.description%"
 						},
 						"urls": {
 							"type": "string",
-							"description": "The URLs to search for content on, separated by commas"
+							"description": "%lmTool.chunkedWebContent.urls.description%"
 						}
 					},
 					"required": [
@@ -128,18 +132,18 @@
 					"search",
 					"vscode-websearchparticipant"
 				],
-				"displayName": "Web Search",
+				"displayName": "%lmTool.webSearch.displayName%",
 				"canBeInvokedManually": true,
 				"name": "websearch",
 				"icon": "globe",
-				"userDescription": "Search the web for relevant up-to-date information",
-				"modelDescription": "Search the web for relevant up-to-date information",
+				"userDescription": "%lmTool.webSearch.userDescription%",
+				"modelDescription": "%lmTool.webSearch.modelDescription%",
 				"parametersSchema": {
 					"type": "object",
 					"properties": {
 						"query": {
 							"type": "string",
-							"description": "The query to search the web for"
+							"description": "%lmTool.webSearch.query.description%"
 						}
 					},
 					"required": [

@@ -1,0 +1,23 @@
+{
+    "configuration.webSearch.title": "Web Search",
+    "config.useSearchResultsDirectly.description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks.",
+    "config.preferredEngine.description": "The preferred search engine to use for web search.",
+    "command.scrapeAndGetNaiveChunks.title": "Scrape and Show Related Naive Chunks Ranked by Embeddings",
+    "command.tavilyScrapeAndGetChunks.title": "Scrape and Show Related Tavily Chunks",
+    "command.tavilyScrapeAndOpenWholeDocument.title": "Tavily Extract and Open Info As Document",
+    "command.tavilyHi.title": "Hi",
+    "command.bingHi.title": "Hi",
+    "command.tavilySearch.title": "Tavily Search",
+    "command.bingSearch.title": "Bing Search",
+    "chatParticipant.websearch.fullName": "Web Search",
+    "chatParticipant.websearch.description": "Search the web for relevant up-to-date information",
+    "lmTool.chunkedWebContent.displayName": "Chunked Web Content",
+    "lmTool.chunkedWebContent.userDescription": "Find relevant content on webpages",
+    "lmTool.chunkedWebContent.modelDescription": "From a list of webpages, find relevant content based on a query",
+    "lmTool.chunkedWebContent.query.description": "Search for content on these websites based on this query",
+    "lmTool.chunkedWebContent.urls.description": "The URLs to search for content on, separated by commas",
+    "lmTool.webSearch.displayName": "Web Search",
+    "lmTool.webSearch.userDescription": "Search the web for relevant up-to-date information",
+    "lmTool.webSearch.modelDescription": "Search the web for relevant up-to-date information",
+    "lmTool.webSearch.query.description": "The query to search the web for"
+}
