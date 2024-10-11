@@ -14,12 +14,12 @@ import {
     UserMessage,
 } from '@vscode/prompt-tsx';
 import { ToolMessage } from '@vscode/prompt-tsx/dist/base/promptElements';
-import * as vscode from 'vscode';
+import { CancellationToken, CancellationTokenSource, ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, ChatRequestTurn, ChatResponseAnchorPart, ChatResponseMarkdownPart, ChatResponseTurn, l10n, LanguageModelToolCallPart, LanguageModelToolDescription, LanguageModelToolInvocationOptions, lm, Location, Uri, workspace } from 'vscode';
 
 export interface ToolUserProps extends BasePromptElementProps {
-    request: vscode.ChatRequest;
-    context: vscode.ChatContext;
-    toolCalls: vscode.LanguageModelToolCallPart[];
+    request: ChatRequest;
+    context: ChatContext;
+    toolCalls: LanguageModelToolCallPart[];
 }
 
 export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
@@ -57,8 +57,8 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
 }
 
 export interface ToolCallsProps extends BasePromptElementProps {
-    toolCalls: vscode.LanguageModelToolCallPart[];
-    toolInvocationToken: vscode.ChatParticipantToolToken;
+    toolCalls: LanguageModelToolCallPart[];
+    toolInvocationToken: ChatParticipantToolToken;
 }
 
 class ToolCalls extends PromptElement<ToolCallsProps, void> {
@@ -67,9 +67,9 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
         return <>
             <AssistantMessage toolCalls={assistantToolCalls}>todo</AssistantMessage>
             {this.props.toolCalls.map(toolCall => {
-                const tool = vscode.lm.tools.find(t => t.id === toolCall.name);
+                const tool = lm.tools.find(t => t.id === toolCall.name);
                 if (!tool) {
-                    console.error(vscode.l10n.t('Tool not found: {0}', toolCall.name));
+                    console.error(l10n.t('Tool not found: {0}', toolCall.name));
                     return undefined;
                 }
 
@@ -81,28 +81,28 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
 }
 
 interface ToolCallProps extends BasePromptElementProps {
-    tool: vscode.LanguageModelToolDescription;
-    toolCall: vscode.LanguageModelToolCallPart;
-    toolInvocationToken: vscode.ChatParticipantToolToken;
+    tool: LanguageModelToolDescription;
+    toolCall: LanguageModelToolCallPart;
+    toolInvocationToken: ChatParticipantToolToken;
 }
 
 const agentSupportedContentTypes = [promptTsxContentType, 'text/plain'];
 
-const dummyCancellationToken: vscode.CancellationToken = new vscode.CancellationTokenSource().token;
+const dummyCancellationToken: CancellationToken = new CancellationTokenSource().token;
 export class ToolCall extends PromptElement<ToolCallProps, void> {
     async render(state: void, sizing: PromptSizing) {
         const contentType = agentSupportedContentTypes.find(type => this.props.tool.supportedContentTypes.includes(type));
         if (!contentType) {
-            console.error(vscode.l10n.t('Tool does not support any of the agent\'s content types: {0}', this.props.tool.id));
+            console.error(l10n.t('Tool does not support any of the agent\'s content types: {0}', this.props.tool.id));
             return <ToolMessage toolCallId={this.props.toolCall.toolCallId}>Tool unsupported</ToolMessage>;
         }
 
-        const tokenOptions: vscode.LanguageModelToolInvocationOptions<unknown>['tokenOptions'] = {
+        const tokenOptions: LanguageModelToolInvocationOptions<unknown>['tokenOptions'] = {
             tokenBudget: sizing.tokenBudget,
             countTokens: async (content: string) => sizing.countTokens(content),
         };
 
-        const result = await vscode.lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, requestedContentTypes: [contentType], toolInvocationToken: this.props.toolInvocationToken, tokenOptions }, dummyCancellationToken);
+        const result = await lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, requestedContentTypes: [contentType], toolInvocationToken: this.props.toolInvocationToken, tokenOptions }, dummyCancellationToken);
         return <>
             <ToolMessage toolCallId={this.props.toolCall.toolCallId}>
                 {contentType === 'text/plain' ?
@@ -115,7 +115,7 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
 
 interface HistoryProps extends BasePromptElementProps {
     priority: number;
-    context: vscode.ChatContext;
+    context: ChatContext;
 }
 
 class History extends PromptElement<HistoryProps, void> {
@@ -123,14 +123,14 @@ class History extends PromptElement<HistoryProps, void> {
         return (
             <PrioritizedList priority={this.props.priority} descending={false}>
                 {this.props.context.history.map((message) => {
-                    if (message instanceof vscode.ChatRequestTurn) {
+                    if (message instanceof ChatRequestTurn) {
                         return (
                             <>
                                 {<PromptReferences references={message.references} />}
                                 <UserMessage>{message.prompt}</UserMessage>
                             </>
                         );
-                    } else if (message instanceof vscode.ChatResponseTurn) {
+                    } else if (message instanceof ChatResponseTurn) {
                         return (
                             <AssistantMessage>
                                 {chatResponseToString(message)}
@@ -143,13 +143,13 @@ class History extends PromptElement<HistoryProps, void> {
     }
 }
 
-function chatResponseToString(response: vscode.ChatResponseTurn): string {
+function chatResponseToString(response: ChatResponseTurn): string {
     return response.response
         .map((r) => {
-            if (r instanceof vscode.ChatResponseMarkdownPart) {
+            if (r instanceof ChatResponseMarkdownPart) {
                 return r.value.value;
-            } else if (r instanceof vscode.ChatResponseAnchorPart) {
-                if (r.value instanceof vscode.Uri) {
+            } else if (r instanceof ChatResponseAnchorPart) {
+                if (r.value instanceof Uri) {
                     return r.value.fsPath;
                 } else {
                     return r.value.uri.fsPath;
@@ -162,7 +162,7 @@ function chatResponseToString(response: vscode.ChatResponseTurn): string {
 }
 
 interface PromptReferencesProps extends BasePromptElementProps {
-    references: ReadonlyArray<vscode.ChatPromptReference>;
+    references: ReadonlyArray<ChatPromptReference>;
 }
 
 class PromptReferences extends PromptElement<PromptReferencesProps, void> {
@@ -178,14 +178,14 @@ class PromptReferences extends PromptElement<PromptReferencesProps, void> {
 }
 
 interface PromptReferenceProps extends BasePromptElementProps {
-    ref: vscode.ChatPromptReference;
+    ref: ChatPromptReference;
 }
 
 class PromptReference extends PromptElement<PromptReferenceProps> {
     async render(state: void, sizing: PromptSizing): Promise<PromptPiece | undefined> {
         const value = this.props.ref.value;
-        if (value instanceof vscode.Uri) {
-            const fileContents = (await vscode.workspace.fs.readFile(value)).toString();
+        if (value instanceof Uri) {
+            const fileContents = (await workspace.fs.readFile(value)).toString();
             return (
                 <Tag name="context">
                     {value.fsPath}:<br />
@@ -194,8 +194,8 @@ class PromptReference extends PromptElement<PromptReferenceProps> {
                     ```<br />
                 </Tag>
             );
-        } else if (value instanceof vscode.Location) {
-            const rangeText = (await vscode.workspace.openTextDocument(value.uri)).getText(value.range);
+        } else if (value instanceof Location) {
+            const rangeText = (await workspace.openTextDocument(value.uri)).getText(value.range);
             return (
                 <Tag name="context">
                     {value.uri.fsPath}:{value.range.start.line + 1}-$<br />
@@ -221,7 +221,7 @@ export class Tag extends PromptElement<TagProps> {
         const { name } = this.props;
 
         if (!Tag._regex.test(name)) {
-            throw new Error(vscode.l10n.t('Invalid tag name: {0}', name));
+            throw new Error(l10n.t('Invalid tag name: {0}', name));
         }
 
         return (
