@@ -38,7 +38,6 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
                 urls,
                 options.parameters.query,
                 {
-                    tfidf: false,
                     crawl: false,
                 },
                 token
