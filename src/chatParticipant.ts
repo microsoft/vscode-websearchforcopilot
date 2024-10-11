@@ -39,6 +39,7 @@ class WebSearchChatParticipant {
             { modelMaxPromptTokens: model.maxInputTokens },
             model);
 
+        // Put our tool at the very end so that it processes the search query after resolving all other variables
         const toolReferences = [...request.toolReferences.filter(ref => ref.id === WebSearchTool.ID), { id: WebSearchTool.ID }];
         const runWithFunctions = async (): Promise<void> => {
             const requestedTool = toolReferences.shift();
