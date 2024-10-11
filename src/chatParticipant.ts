@@ -1,4 +1,4 @@
-import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool } from "vscode";
+import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri } from "vscode";
 import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
@@ -25,8 +25,7 @@ class WebSearchChatParticipant {
         const options: LanguageModelChatRequestOptions = {
             justification: 'To parse web search results and summarize an answer',
         };
-
-        let { messages } = await renderPrompt(
+        let { messages, references } = await renderPrompt(
             ToolUserPrompt,
             {
                 context: chatContext,
@@ -64,7 +63,7 @@ class WebSearchChatParticipant {
             }
 
             if (toolCalls.length) {
-                messages = (await renderPrompt(
+                const result = await renderPrompt(
                     ToolUserPrompt,
                     {
                         context: chatContext,
@@ -72,7 +71,9 @@ class WebSearchChatParticipant {
                         toolCalls: toolCalls,
                     },
                     { modelMaxPromptTokens: model.maxInputTokens },
-                    model)).messages;
+                    model);
+                messages = result.messages;
+                references = result.references;
 
                 // RE-enter
                 return runWithFunctions();
@@ -80,6 +81,10 @@ class WebSearchChatParticipant {
         };
 
         await runWithFunctions();
+        for (const ref of references) {
+            // TODO: why `as`?
+            stream.reference(ref.anchor as Uri);
+        }
     };
 }
 

@@ -5,6 +5,7 @@ import {
     BasePromptElementProps,
     PrioritizedList,
     PromptElement,
+    PromptReference,
     PromptSizing,
     contentType as promptTsxContentType,
     renderElementJSON
@@ -76,6 +77,7 @@ class WebToolCalls extends PromptElement<WebSearchToolProps, void> {
     render(state: void, sizing: PromptSizing) {
         return <>
             <TextChunk>Here is some relevent context from webpages across the internet:</TextChunk>
+            <references value={this.props.chunks.map(c => (PromptReference.fromJSON({ anchor: c.file.toJSON() })))}></references>
             <PrioritizedList priority={100} descending={true}>
             {
                 this.props.chunks.map(chunk => <TextChunk>{chunk.text}</TextChunk>)
