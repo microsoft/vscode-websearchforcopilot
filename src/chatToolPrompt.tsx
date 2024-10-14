@@ -67,7 +67,7 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
         return <>
             <AssistantMessage toolCalls={assistantToolCalls}>todo</AssistantMessage>
             {this.props.toolCalls.map(toolCall => {
-                const tool = lm.tools.find(t => t.id === toolCall.name);
+                const tool = lm.tools.find(t => t.name === toolCall.name);
                 if (!tool) {
                     console.error(l10n.t('Tool not found: {0}', toolCall.name));
                     return undefined;
@@ -93,7 +93,7 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
     async render(state: void, sizing: PromptSizing) {
         const contentType = agentSupportedContentTypes.find(type => this.props.tool.supportedContentTypes.includes(type));
         if (!contentType) {
-            console.error(l10n.t('Tool does not support any of the agent\'s content types: {0}', this.props.tool.id));
+            console.error(l10n.t('Tool does not support any of the agent\'s content types: {0}', this.props.tool.name));
             return <ToolMessage toolCallId={this.props.toolCall.toolCallId}>Tool unsupported</ToolMessage>;
         }
 

@@ -20,7 +20,7 @@ class WebSearchChatParticipant {
 
         const allTools = lm.tools.map((tool): LanguageModelChatTool => {
             return {
-                name: tool.id,
+                name: tool.name,
                 description: tool.description,
                 parametersSchema: tool.parametersSchema ?? {}
             };
@@ -60,9 +60,6 @@ class WebSearchChatParticipant {
                     stream.markdown(part.value);
                     responseStr += part.value;
                 } else if (part instanceof LanguageModelToolCallPart) {
-                    // TODO vscode should be doing this
-                    part.parameters = JSON.parse(part.parameters);
-
                     toolCalls.push(part);
                 }
             }

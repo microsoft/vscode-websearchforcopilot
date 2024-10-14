@@ -66,21 +66,20 @@
 							"who is Moo Deng?"
 						]
 					}
-				],
-				"supportsToolReferences": true
+				]
 			}
 		],
 		"languageModelTools": [
 			{
-				"id": "vscode-websearchparticipant_webSearch",
+				"name": "vscode-websearchparticipant_webSearch",
 				"tags": [
 					"web",
 					"search",
 					"vscode-websearchparticipant"
 				],
 				"displayName": "%lmTool.webSearch.displayName%",
-				"canBeInvokedManually": true,
-				"name": "websearch",
+				"canBeReferencedInPrompt": true,
+				"toolReferenceName": "websearch",
 				"icon": "globe",
 				"userDescription": "%lmTool.webSearch.userDescription%",
 				"modelDescription": "%lmTool.webSearch.modelDescription%",
