@@ -7,11 +7,12 @@ import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
 import Logger from "./logger";
+import chatState from "./chatState";
 
 class WebSearchChatParticipant {
     constructor(private readonly _context: ExtensionContext) { }
 
-    handler: ChatRequestHandler = async (request: ChatRequest, chatContext: ChatContext, stream: ChatResponseStream, token: CancellationToken) => {
+    handler: ChatRequestHandler = async (request: ChatRequest, context: ChatContext, stream: ChatResponseStream, token: CancellationToken) => {
         const models = await lm.selectChatModels({
             vendor: 'copilot',
             family: 'gpt-4o'
@@ -31,15 +32,7 @@ class WebSearchChatParticipant {
         const options: LanguageModelChatRequestOptions = {
             justification: l10n.t('To analyze web search results and summarize an answer'),
         };
-        let { messages, references } = await renderPrompt(
-            ToolUserPrompt,
-            {
-                context: chatContext,
-                request,
-                toolCalls: [],
-            },
-            { modelMaxPromptTokens: model.maxInputTokens },
-            model);
+        let { messages, references } = await renderPrompt(ToolUserPrompt, { context, request, toolCalls: [] }, { modelMaxPromptTokens: model.maxInputTokens }, model);
 
         // Put our tool at the very end so that it processes the search query after resolving all other variables
         const toolReferences = [...request.toolReferences.filter(ref => ref.id === WebSearchTool.ID), { id: WebSearchTool.ID }];
@@ -67,13 +60,11 @@ class WebSearchChatParticipant {
             }
 
             if (toolCalls.length) {
+                // Store the stream so that the tool can reference it
+                chatState.set(request.toolInvocationToken, stream);
                 const result = await renderPrompt(
                     ToolUserPrompt,
-                    {
-                        context: chatContext,
-                        request: request,
-                        toolCalls: toolCalls,
-                    },
+                    { context, request, toolCalls },
                     { modelMaxPromptTokens: model.maxInputTokens },
                     model);
                 messages = result.messages;

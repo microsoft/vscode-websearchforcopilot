@@ -15,6 +15,7 @@ import {
 } from '@vscode/prompt-tsx';
 import { ToolMessage } from '@vscode/prompt-tsx/dist/base/promptElements';
 import { CancellationToken, CancellationTokenSource, ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, ChatRequestTurn, ChatResponseAnchorPart, ChatResponseMarkdownPart, ChatResponseTurn, l10n, LanguageModelToolCallPart, LanguageModelToolDescription, LanguageModelToolInvocationOptions, lm, Location, Uri, workspace } from 'vscode';
+import { WebSearchTool, WebSearchToolParameters } from './chatTool';
 
 export interface ToolUserProps extends BasePromptElementProps {
     request: ChatRequest;
@@ -102,7 +103,14 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
             countTokens: async (content: string) => sizing.countTokens(content),
         };
 
-        const result = await lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, requestedContentTypes: [contentType], toolInvocationToken: this.props.toolInvocationToken, tokenOptions }, dummyCancellationToken);
+        // HACK: This is a temporary workaround to allow the tool to access the chat response stream.
+        let toolInvocationToken = this.props.toolInvocationToken;
+        let parameters: WebSearchToolParameters = this.props.toolCall.parameters as WebSearchToolParameters;
+        if (this.props.tool.name === WebSearchTool.ID) {
+            toolInvocationToken = undefined;
+            parameters.toolInvocationToken = this.props.toolInvocationToken;
+        }
+        const result = await lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, requestedContentTypes: [contentType], toolInvocationToken, tokenOptions }, dummyCancellationToken);
         return <>
             <ToolMessage toolCallId={this.props.toolCall.toolCallId}>
                 {contentType === 'text/plain' ?

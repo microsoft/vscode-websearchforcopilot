@@ -12,7 +12,8 @@
 	],
 	"activationEvents": [],
 	"enabledApiProposals": [
-		"lmTools"
+		"lmTools",
+		"chatParticipantAdditions"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
