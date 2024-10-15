@@ -7,6 +7,7 @@ import { BingAuthProvider, TavilyAuthProvider } from './auth/authProvider';
 import { BetterTokenStorage } from './auth/betterSecretStorage';
 import { registerChatParticipant } from './chatParticipant';
 import { WebSearchTool } from './chatTool';
+import Logger from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
     registerAuthProviders(context);
@@ -27,6 +28,7 @@ function registerAuthProviders(context: vscode.ExtensionContext) {
         new BingAuthProvider(new BetterTokenStorage('bing.keylist', context)),
         { supportsMultipleAccounts: true }
     ));
+    context.subscriptions.push(Logger);
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {

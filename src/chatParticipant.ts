@@ -6,6 +6,7 @@ import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatRes
 import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
+import Logger from "./logger";
 
 class WebSearchChatParticipant {
     constructor(private readonly _context: ExtensionContext) { }
@@ -17,6 +18,7 @@ class WebSearchChatParticipant {
         });
 
         const model = models[0];
+        Logger.debug(`Using model ${model.name}`);
 
         const allTools = lm.tools.map((tool): LanguageModelChatTool => {
             return {
