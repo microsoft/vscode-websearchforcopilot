@@ -6,6 +6,7 @@ import {
 	AuthenticationProvider,
 	AuthenticationProviderAuthenticationSessionsChangeEvent,
 	AuthenticationSession,
+	Disposable,
 	EventEmitter,
 	ThemeIcon,
 	Uri,
@@ -13,24 +14,34 @@ import {
 	l10n,
 	window,
 } from 'vscode';
-import { BetterTokenStorage } from './betterSecretStorage';
 import { BingEngine } from '../search/webSearch';
+import { ApiKeyDetails, ApiKeySecretStorage } from './secretStorage';
 
 export abstract class BaseAuthProvider implements AuthenticationProvider {
-	_didChangeSessions =
-		new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
+	private readonly _disposable: Disposable;
+
+	private readonly _didChangeSessions = new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
 	onDidChangeSessions = this._didChangeSessions.event;
 
 	protected abstract readonly name: string;
 	protected abstract readonly createKeyUrl: string | undefined;
 
-	constructor(private readonly _secrets: BetterTokenStorage<AuthenticationSession>) {}
+	constructor(private readonly _secrets: ApiKeySecretStorage) {
+		this._disposable = Disposable.from(
+			this._didChangeSessions,
+			_secrets.onDidChange((e) => this._didChangeSessions.fire({
+				added: e.added.map((a) => this._toAuthenticationSession(a)),
+				removed: e.removed.map((a) => this._toAuthenticationSession(a)),
+				changed: e.changed.map((a) => this._toAuthenticationSession(a))
+			}))
+		);
+	}
 
 	protected abstract validateKey(key: string): Promise<boolean>;
 
 	async getSessions(_scopes?: string[]): Promise<AuthenticationSession[]> {
 		try {
-			return await this._secrets.getAll();
+			return this._secrets.getAll().map((a) => this._toAuthenticationSession(a));
 		} catch (e) {
 			console.error(e);
 			return [];
@@ -94,10 +105,9 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 			});
 		});
 
-		const id = Math.random().toString(36).slice(2);
 		const authSession: AuthenticationSession = {
 			accessToken: key,
-			id,
+			id: name,
 			account: {
 				label: name,
 				id: name,
@@ -106,15 +116,28 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 		};
 
 		// Store and return the session
-		await this._secrets.store(id, authSession);
-		this._didChangeSessions.fire({ added: [authSession], removed: [], changed: [] });
+		await this._secrets.set(name, key);
 		return authSession;
 	}
 
 	async removeSession(sessionId: string): Promise<void> {
-		const removed = await this._secrets.get(sessionId);
 		await this._secrets.delete(sessionId);
-		this._didChangeSessions.fire({ added: [], removed: removed ? [removed] : [], changed: [] });
+	}
+
+	private _toAuthenticationSession(details: ApiKeyDetails): AuthenticationSession {
+		return {
+			accessToken: details.apiKey,
+			id: details.name,
+			account: {
+				label: details.name,
+				id: details.name,
+			},
+			scopes: [],
+		};
+	}
+
+	dispose() {
+		this._disposable.dispose();
 	}
 }
 

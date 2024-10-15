@@ -4,35 +4,35 @@
  *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
 import { BingAuthProvider, TavilyAuthProvider } from './auth/authProvider';
-import { BetterTokenStorage } from './auth/betterSecretStorage';
 import { registerChatParticipant } from './chatParticipant';
 import { WebSearchTool } from './chatTool';
 import Logger from './logger';
+import { ApiKeySecretStorage } from './auth/secretStorage';
 
-export function activate(context: vscode.ExtensionContext) {
-    registerAuthProviders(context);
+export async function activate(context: vscode.ExtensionContext) {
+    context.subscriptions.push(Logger);
+    await registerAuthProviders(context);
     registerChatTools(context);
     registerChatParticipant(context);
 }
 
-function registerAuthProviders(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.authentication.registerAuthenticationProvider(
-        TavilyAuthProvider.ID,
-        TavilyAuthProvider.NAME,
-        new TavilyAuthProvider(new BetterTokenStorage('tavily.keylist', context)),
-        { supportsMultipleAccounts: true }
+async function registerAuthProviders(context: vscode.ExtensionContext) {
+    const tavilySecretStorage = new ApiKeySecretStorage('tavily.keys', context);
+    await tavilySecretStorage.initialize();
+    const tavilyAuthProvider = new TavilyAuthProvider(tavilySecretStorage);
+
+    const bingSecretStorage = new ApiKeySecretStorage('bing.keys', context);
+    await bingSecretStorage.initialize();
+    const bingAuthProvider = new BingAuthProvider(bingSecretStorage);
+
+    context.subscriptions.push(vscode.Disposable.from(
+        tavilyAuthProvider,
+        vscode.authentication.registerAuthenticationProvider(TavilyAuthProvider.ID, TavilyAuthProvider.NAME, new TavilyAuthProvider(tavilySecretStorage), { supportsMultipleAccounts: true }),
+        bingAuthProvider,
+        vscode.authentication.registerAuthenticationProvider(BingAuthProvider.ID, BingAuthProvider.NAME, new BingAuthProvider(bingSecretStorage), { supportsMultipleAccounts: true })
     ));
-    context.subscriptions.push(vscode.authentication.registerAuthenticationProvider(
-        BingAuthProvider.ID,
-        BingAuthProvider.NAME,
-        new BingAuthProvider(new BetterTokenStorage('bing.keylist', context)),
-        { supportsMultipleAccounts: true }
-    ));
-    context.subscriptions.push(Logger);
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool()));
 }
-
-export function deactivate() { }
