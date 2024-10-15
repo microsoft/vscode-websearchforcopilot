@@ -89,14 +89,6 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 				disposable.dispose();
 				resolve(input.value);
 			});
-
-			const hideDisposable = input.onDidHide(async () => {
-				if (!input.value || !(await this.validateKey(input.value))) {
-					disposable.dispose();
-					hideDisposable.dispose();
-					reject(new Error('Invalid API key'));
-				}
-			});
 		});
 
 		// Get a name for the session
