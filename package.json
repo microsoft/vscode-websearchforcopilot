@@ -135,7 +135,7 @@
 		"@azure/core-auth": "^1.8.0",
 		"@azure/core-sse": "^2.1.3",
 		"@microsoft/tiktokenizer": "^1.0.8",
-		"@vscode/prompt-tsx": "^0.3.0-alpha.3",
+		"@vscode/prompt-tsx": "^0.3.0-alpha.5",
 		"cheerio": "^1.0.0-rc.12",
 		"jsdom": "^25.0.1"
 	}

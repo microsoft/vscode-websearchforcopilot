@@ -13,7 +13,7 @@ import {
     PromptSizing,
     UserMessage,
 } from '@vscode/prompt-tsx';
-import { ToolMessage } from '@vscode/prompt-tsx/dist/base/promptElements';
+import { TextChunk, ToolMessage } from '@vscode/prompt-tsx/dist/base/promptElements';
 import { CancellationToken, CancellationTokenSource, ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, ChatRequestTurn, ChatResponseAnchorPart, ChatResponseMarkdownPart, ChatResponseTurn, l10n, LanguageModelToolCallPart, LanguageModelToolDescription, LanguageModelToolInvocationOptions, lm, Location, Uri, workspace } from 'vscode';
 import { WebSearchTool, WebSearchToolParameters } from './chatTool';
 
@@ -27,7 +27,7 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
     render(state: void, sizing: PromptSizing) {
         return (
             <>
-                <UserMessage priority={50}>
+                <UserMessage priority={60}>
                     Instructions:<br />
                     - The user will ask a question, or ask you to perform a task, and it may
                     require lots of research to answer correctly. There is a selection of
@@ -45,13 +45,35 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
                     edit or new file contents. Assume that the user can see the result.<br />
                     - DO NOT CALL multi_tool_use.parallel FOR ANY REASON. This is a special tool for internal use only.
                 </UserMessage>
-                <History context={this.props.context} priority={20}></History>
+                {/* Give older History messages less priority and have them flexGrow last */}
+                <History
+                    context={this.props.context}
+                    start={0}
+                    end={this.props.context.history.length - 1}
+                    priority={10}
+                    flexGrow={3}
+                />
+                {/* Give the last message a higher priority than the other history messages
+                    and reserve space for it to be present by not specifying flex */}
+                <History
+                    context={this.props.context}
+                    start={this.props.context.history.length - 1}
+                    end={this.props.context.history.length}
+                    priority={20}
+                />
+                {/* References have a higher priority than history because we care about them more. We also use flexGrow to include
+                    as much as we can before we render history. Lastly we use flexReserve to reserve some amount of budget so
+                    that they do get reserved some space to render */}
                 <PromptReferences
                     references={this.props.request.references}
                     priority={30}
+                    flexReserve='/3'
+                    flexGrow={2}
                 />
-                <UserMessage priority={40}>{this.props.request.prompt}</UserMessage>
-                <ToolCalls toolCalls={this.props.toolCalls} toolInvocationToken={this.props.request.toolInvocationToken}></ToolCalls>
+                {/* It's the prompt, it needs a higher priority than any of the above */}
+                <UserMessage priority={50}>{this.props.request.prompt}</UserMessage>
+                {/* Tool calls are slightly more important than references and are given the opportunity to flexGrow before anything else */}
+                <ToolCalls priority={40} toolCalls={this.props.toolCalls} toolInvocationToken={this.props.request.toolInvocationToken} flexGrow={1}></ToolCalls>
             </>
         );
     }
@@ -98,6 +120,7 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
             return <ToolMessage toolCallId={this.props.toolCall.toolCallId}>Tool unsupported</ToolMessage>;
         }
 
+        // Would be nice if this could just be `sizing`... their types are nearly the same.
         const tokenOptions: LanguageModelToolInvocationOptions<unknown>['tokenOptions'] = {
             tokenBudget: sizing.tokenBudget,
             countTokens: async (content: string) => sizing.countTokens(content),
@@ -110,7 +133,16 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
             toolInvocationToken = undefined;
             parameters.toolInvocationToken = this.props.toolInvocationToken;
         }
-        const result = await lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, requestedContentTypes: [contentType], toolInvocationToken, tokenOptions }, dummyCancellationToken);
+        const result = await lm.invokeTool(
+            this.props.toolCall.name,
+            {
+                parameters: this.props.toolCall.parameters,
+                requestedContentTypes: [contentType],
+                toolInvocationToken,
+                tokenOptions
+            },
+            dummyCancellationToken
+        );
         return <>
             <ToolMessage toolCallId={this.props.toolCall.toolCallId}>
                 {contentType === 'text/plain' ?
@@ -124,13 +156,15 @@ export class ToolCall extends PromptElement<ToolCallProps, void> {
 interface HistoryProps extends BasePromptElementProps {
     priority: number;
     context: ChatContext;
+    start: number;
+    end: number;
 }
 
 class History extends PromptElement<HistoryProps, void> {
     render(state: void, sizing: PromptSizing) {
         return (
             <PrioritizedList priority={this.props.priority} descending={false}>
-                {this.props.context.history.map((message) => {
+                {this.props.context.history.slice(this.props.start, this.props.end).map((message) => {
                     if (message instanceof ChatRequestTurn) {
                         return (
                             <>
@@ -196,9 +230,9 @@ class PromptReference extends PromptElement<PromptReferenceProps> {
             const fileContents = (await workspace.fs.readFile(value)).toString();
             return (
                 <Tag name="context">
-                    {value.fsPath}:<br />
+                    {value.toString(true)}
                     ``` <br />
-                    {fileContents}<br />
+                    <TextChunk breakOnWhitespace>{fileContents}</TextChunk><br />
                     ```<br />
                 </Tag>
             );
@@ -206,9 +240,9 @@ class PromptReference extends PromptElement<PromptReferenceProps> {
             const rangeText = (await workspace.openTextDocument(value.uri)).getText(value.range);
             return (
                 <Tag name="context">
-                    {value.uri.fsPath}:{value.range.start.line + 1}-$<br />
-                    {value.range.end.line + 1}: ```<br />
-                    {rangeText}<br />
+                    {value.uri.toString(true)}:{value.range.start.line + 1}-{value.range.end.line + 1}
+                    ```<br />
+                    <TextChunk breakOnWhitespace>{rangeText}</TextChunk><br />
                     ```
                 </Tag>
             );
