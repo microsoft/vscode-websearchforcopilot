@@ -19,7 +19,8 @@ import { IWebSearchResults } from "./search/webSearchTypes";
 import { URI } from "@vscode/prompt-tsx/dist/base/util/vs/common/uri";
 import { TextChunk } from "@vscode/prompt-tsx/dist/base/promptElements";
 import chatState from "./chatState";
-import { EmbeddingsCache } from "./webChunk/index/embeddings";
+import { EmbeddingsCache, RateLimitReachedError } from "./webChunk/index/embeddings";
+import Logger from "./logger";
 
 export interface WebSearchToolParameters {
     query: string;
@@ -57,15 +58,22 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
             chunks = this.toFileChunks(results);
         } else {
             const urls = results.urls.map(u => u.url);
-            chunks = await findNaiveChunksBasedOnQuery(
-                urls,
-                options.parameters.query,
-                this._embeddingsCache,
-                {
-                    crawl: false,
-                },
-                token
-            );
+            try {
+                chunks = await findNaiveChunksBasedOnQuery(
+                    urls,
+                    options.parameters.query,
+                    this._embeddingsCache,
+                    {
+                        crawl: false,
+                    },
+                    token
+                );
+            } catch (e) {
+                if (e instanceof RateLimitReachedError) {
+                    Logger.error(`Rate limit reached: ${e.message} :(`);
+                }
+                throw e;
+            }
         }
         const response: LanguageModelToolResult = {};
         for (const contentType of options.requestedContentTypes) {

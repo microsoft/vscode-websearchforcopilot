@@ -122,6 +122,12 @@ export class EmbeddingsCache {
 
 }
 
+export class RateLimitReachedError extends Error {
+    constructor(msg: string) {
+        super('Rate limit reached: ' + msg);
+    }
+}
+
 export class EmbeddingsIndex {
     chunks: FileChunkWithScorer[] = [];
 
@@ -174,6 +180,7 @@ export class EmbeddingsIndex {
 
     }
 
+
     async getEmbeddings(text: string[]): Promise<Embedding[]> {
         const githubSession = await vscode.authentication.getSession('github', ['user:email'], { createIfNone: true });
 
@@ -191,7 +198,11 @@ export class EmbeddingsIndex {
 
 
             if (isUnexpected(response)) {
-                throw response.body.error;
+                if (response.status === '429') {
+                    throw new RateLimitReachedError(response.body.error.message);
+                } else {
+                    throw response.body.error;
+                }
             }
 
             return response.body.data.map(d => d.embedding);
@@ -200,10 +211,13 @@ export class EmbeddingsIndex {
         const inputs = Array.from(text);
         const ret = [];
 
+        const overloadLimit = 1000;
         const groups = await this.batchChunksIntoGroups(inputs, 50000); // limit ~64k
 
-        for (const group of groups) {
-            ret.push(...await sendReq(group));
+        for (let i = 0; i < overloadLimit; i += 1) {
+            for (const group of groups) {
+                ret.push(...await sendReq(group));
+            }
         }
 
         return ret;
