@@ -42,5 +42,5 @@ function registerChatTools(context: vscode.ExtensionContext) {
 }
 
 function registerCommands(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchchattools.toggleWebSearchPromptTracer', () => toggleTracing(context.extensionMode)));
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchforcopilot.toggleWebSearchPromptTracer', () => toggleTracing(context.extensionMode)));
 }

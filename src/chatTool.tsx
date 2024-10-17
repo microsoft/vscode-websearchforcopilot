@@ -33,7 +33,7 @@ interface WebSearchToolProps extends BasePromptElementProps {
 }
 
 export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters> {
-    static ID = 'vscode-websearchparticipant_webSearch';
+    static ID = 'vscode-websearchforcopilot_webSearch';
 
     constructor(private _embeddingsCache: EmbeddingsCache) { }
     prepareToolInvocation(options: LanguageModelToolInvocationPrepareOptions<WebSearchToolParameters>, token: CancellationToken): ProviderResult<PreparedToolInvocation> {

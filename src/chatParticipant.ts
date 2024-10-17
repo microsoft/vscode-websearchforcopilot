@@ -82,7 +82,7 @@ class WebSearchChatParticipant {
 
 export function registerChatParticipant(context: ExtensionContext) {
     const chatParticipant = new WebSearchChatParticipant(context);
-    const toolUser = chat.createChatParticipant('vscode-websearchparticipant.websearch', (request, context, response, token) => chatParticipant.handler(request, context, response, token));
+    const toolUser = chat.createChatParticipant('vscode-websearchforcopilot.websearch', (request, context, response, token) => chatParticipant.handler(request, context, response, token));
     toolUser.iconPath = new ThemeIcon('globe');
     context.subscriptions.push(toolUser);
 }

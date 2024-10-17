@@ -38,17 +38,7 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
 
         for (let i = 0; i < this._urls.length; i++) {
             const url = this._urls[i];
-            let result = await window.withProgress(
-                {
-                    location: ProgressLocation.Notification,
-                    title: l10n.t('Crawling, Indexing, and Chunking {0}', url)
-                },
-                async (_) => {
-                    const result = this._crawl ? await crawl(url) : [await scrape(url)];
-                    return result;
-                }
-            );
-
+            let result = this._crawl ? await crawl(url) : [await scrape(url)];
 
             const docs = new Array<FileChunkWithScorer>;
             for (const page of result) {

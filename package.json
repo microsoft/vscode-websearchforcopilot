@@ -1,8 +1,8 @@
 {
-	"name": "vscode-websearchchattools",
+	"name": "vscode-websearchforcopilot",
 	"publisher": "ms-vscode",
 	"displayName": "Web Search for Copilot",
-	"description": "Search the web right from chat",
+	"description": "Gives access to search engines from within Copilot",
 	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.95.0"
@@ -50,7 +50,7 @@
 		],
 		"commands": [
 			{
-				"command": "vscode-websearchchattools.toggleWebSearchPromptTracer",
+				"command": "vscode-websearchforcopilot.toggleWebSearchPromptTracer",
 				"category": "Web Search",
 				"enablement": "isDevelopment",
 				"title": "Toggle Web Search Prompt Tracer"
@@ -58,7 +58,7 @@
 		],
 		"chatParticipants": [
 			{
-				"id": "vscode-websearchparticipant.websearch",
+				"id": "vscode-websearchforcopilot.websearch",
 				"fullName": "%chatParticipant.websearch.fullName%",
 				"name": "websearch",
 				"description": "%chatParticipant.websearch.description%",
@@ -79,11 +79,11 @@
 		],
 		"languageModelTools": [
 			{
-				"name": "vscode-websearchparticipant_webSearch",
+				"name": "vscode-websearchforcopilot_webSearch",
 				"tags": [
 					"web",
 					"search",
-					"vscode-websearchparticipant"
+					"vscode-websearchforcopilot"
 				],
 				"displayName": "%lmTool.webSearch.displayName%",
 				"canBeReferencedInPrompt": true,
