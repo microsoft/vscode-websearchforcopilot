@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri, l10n } from "vscode";
-import { renderPrompt } from '@vscode/prompt-tsx';
 import { ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
 import Logger from "./logger";
 import chatState from "./chatState";
+import { renderPrompt } from "./promptTracing";
 
 class WebSearchChatParticipant {
     constructor(private readonly _context: ExtensionContext) { }
@@ -32,7 +32,8 @@ class WebSearchChatParticipant {
         const options: LanguageModelChatRequestOptions = {
             justification: l10n.t('To analyze web search results and summarize an answer'),
         };
-        let { messages, references } = await renderPrompt(ToolUserPrompt, { context, request, toolCalls: [] }, { modelMaxPromptTokens: model.maxInputTokens }, model);
+
+        let { messages, references } = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls: [] }, model, token);
 
         // Put our tool at the very end so that it processes the search query after resolving all other variables
         const toolReferences = [...request.toolReferences.filter(ref => ref.id === WebSearchTool.ID), { id: WebSearchTool.ID }];
@@ -62,11 +63,7 @@ class WebSearchChatParticipant {
             if (toolCalls.length) {
                 // Store the stream so that the tool can reference it
                 chatState.set(request.toolInvocationToken, stream);
-                const result = await renderPrompt(
-                    ToolUserPrompt,
-                    { context, request, toolCalls },
-                    { modelMaxPromptTokens: model.maxInputTokens },
-                    model);
+                const result = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls }, model, token);
                 messages = result.messages;
                 references = result.references;
 

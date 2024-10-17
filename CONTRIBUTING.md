@@ -2,6 +2,14 @@
 
 First, `npm ci` to get dependencies. Then, `F5`.
 
+If you would like to debug the prompt, while the extension is running the Development Extension Host, you can run the following command in the Command Palette:
+
+```
+> Web Search: Toggle Web Search Prompt Tracer
+```
+
+Then, when you ask the chat participant a question, you will see a progress notification with the url to open to see the trace.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
