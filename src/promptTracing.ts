@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { BasePromptElementProps, HTMLTracer, IChatEndpointInfo, PromptElementCtor, PromptRenderer, PromptSizing, RenderPromptResult, toVsCodeChatMessages } from "@vscode/prompt-tsx";
+import { BasePromptElementProps, HTMLTracer, IChatEndpointInfo, PromptElementCtor, PromptRenderer, RenderPromptResult, toVsCodeChatMessages } from "@vscode/prompt-tsx";
 import { AnyTokenizer } from "@vscode/prompt-tsx/dist/base/tokenizer/tokenizer";
-import { CancellationToken, ExtensionMode, LanguageModelChat, LanguageModelChatMessage, LanguageModelToolInvocationOptions, ProgressLocation, window } from "vscode";
+import { CancellationToken, ExtensionMode, LanguageModelChat, LanguageModelChatMessage, ProgressLocation, window } from "vscode";
 
 let tracingEnabled = false;
 export function toggleTracing(extensionMode: ExtensionMode) {

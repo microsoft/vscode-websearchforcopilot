@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { window, ProgressLocation, Uri, CancellationToken, l10n } from "vscode";
+import { Uri, CancellationToken } from "vscode";
 import { naiveChunk } from "../chunker/chunker";
 import { crawl, scrape } from "../crawler/webCrawler";
 import { FileChunk, getDocumentFromPage, ResourceMap } from "../utils";
