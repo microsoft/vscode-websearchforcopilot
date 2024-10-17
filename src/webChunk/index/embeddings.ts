@@ -8,9 +8,11 @@ import { isUnexpected } from "@azure-rest/ai-inference";
 import ModelClient from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
 import { tokenLength } from "../tokenizer";
+import Logger from "../../logger";
 
 export type Embedding = readonly number[];
 type FileChunkWithEmbeddings = [FileChunkWithScorer, Embedding];
+import * as fs from 'fs';
 const modelName = "text-embedding-3-small";
 const endpoint = "https://models.inference.ai.azure.com";
 
@@ -33,17 +35,91 @@ function stringHash(str: string): number {
 export interface FileChunkWithScorer extends FileChunk {
     scoreBonus: number;
 }
+interface OnDiskEmbedding {
+    lastUsed: Date;
+    embedding: Embedding;
+}
 
 export class EmbeddingsCache {
-    private cache: Map<number, Embedding> = new Map<number, Embedding>();
+    private _loadPromise: Promise<void>;
+    private _saveCacheSerializer: Promise<void> | undefined;
+    private _cacheFile: vscode.Uri;
+    constructor(private extensionDir: vscode.Uri) {
+        this._cacheFile = this.extensionDir.with({ path: this.extensionDir.path + '/cached-embeddings.json' });
+        this._loadPromise = this.load();
+
+    }
+
+    public async initCache(): Promise<void> {
+        return this._loadPromise;
+    }
+
+    public async saveCache(): Promise<void> {
+
+        this._evictOldEntries();
+        const doCacheSave = async () => {
+            await this.save();
+            Logger.info('Embeddings cache saved');
+        };
+        if (this._saveCacheSerializer) {
+            this._saveCacheSerializer = this._saveCacheSerializer.then(doCacheSave);
+        }
+
+        this._saveCacheSerializer = doCacheSave();
+        return this._saveCacheSerializer;
+    }
+
+    private cache: Map<number, OnDiskEmbedding> = new Map<number, OnDiskEmbedding>();
 
     public get(chunk: string): Embedding | undefined {
-        return this.cache.get(stringHash(chunk));
+        const entry = this.cache.get(stringHash(chunk));
+        if (entry) {
+            entry.lastUsed = new Date();
+            return entry.embedding;
+        }
+
+        return undefined;
     }
 
     public set(chunk: string, embedding: Embedding) {
-        this.cache.set(stringHash(chunk), embedding);
+        this.cache.set(stringHash(chunk), { embedding, lastUsed: new Date() });
     }
+    public async load(): Promise<void> {
+        try {
+            const file = (await fs.promises.readFile(this._cacheFile.fsPath)).toString();
+            const cache = JSON.parse(file);
+            for (const [key, value] of Object.entries(cache)) {
+                this.cache.set(parseInt(key), {
+                    lastUsed: new Date((<OnDiskEmbedding>value).lastUsed),
+                    embedding: (<OnDiskEmbedding>value).embedding
+                });
+            }
+        } catch (e) {
+            Logger.info(`No cache found on disk.`);
+        }
+    }
+
+    private _evictOldEntries() {
+        // delete any entries that are more than a week old
+        const now = new Date();
+        const week = 7 * 24 * 60 * 60 * 1000;
+        let evicted = 0;
+        for (const [key, value] of this.cache.entries()) {
+            if (now.getTime() - value.lastUsed.getTime() > week) {
+                this.cache.delete(key);
+                evicted++;
+            }
+        }
+        Logger.debug(`Evicted ${evicted} old embeddings from cache`);
+    }
+
+    public async save(): Promise<void> {
+        const obj = Object.fromEntries(this.cache.entries());
+        await fs.promises.writeFile(this._cacheFile.fsPath, JSON.stringify(obj));
+        Logger.debug(`Embeddings cache saved to ${this._cacheFile.fsPath}`);
+    }
+
+
 }
 
 export class EmbeddingsIndex {
@@ -84,12 +160,15 @@ export class EmbeddingsIndex {
         const fileChunksWithEmbeddings: FileChunkWithEmbeddings[] = Array.from(fileChunksWithCachedEmbeddings);
         const queryEmbedding = cachedQuery ? cachedQuery : embeddings.shift() as Embedding;
 
+        if (!cachedQuery) {
+            this.embeddingsCache.set(query, queryEmbedding);
+        }
         for (let i = 0; i < embeddings.length; i++) {
             const e = embeddings[i];
             fileChunksWithEmbeddings.push([fileChunksWithoutCachedEmbeddings[i], e]);
             this.embeddingsCache.set(fileChunksWithoutCachedEmbeddings[i].text, e);
         }
-
+        this.embeddingsCache.saveCache();
         const ranked = this.rankEmbeddings<FileChunkWithScorer>(queryEmbedding, fileChunksWithEmbeddings, maxResults);
         return ranked;
 

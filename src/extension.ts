@@ -8,6 +8,7 @@ import { registerChatParticipant } from './chatParticipant';
 import { WebSearchTool } from './chatTool';
 import Logger from './logger';
 import { ApiKeySecretStorage } from './auth/secretStorage';
+import { EmbeddingsCache } from './webChunk/index/embeddings';
 
 export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(Logger);
@@ -34,5 +35,6 @@ async function registerAuthProviders(context: vscode.ExtensionContext) {
 }
 
 function registerChatTools(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool()));
+    const embeddingsCache = new EmbeddingsCache(context.extensionUri);
+    context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool(embeddingsCache)));
 }

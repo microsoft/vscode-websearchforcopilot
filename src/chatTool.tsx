@@ -19,6 +19,7 @@ import { IWebSearchResults } from "./search/webSearchTypes";
 import { URI } from "@vscode/prompt-tsx/dist/base/util/vs/common/uri";
 import { TextChunk } from "@vscode/prompt-tsx/dist/base/promptElements";
 import chatState from "./chatState";
+import { EmbeddingsCache } from "./webChunk/index/embeddings";
 
 export interface WebSearchToolParameters {
     query: string;
@@ -32,7 +33,8 @@ interface WebSearchToolProps extends BasePromptElementProps {
 
 export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters> {
     static ID = 'vscode-websearchparticipant_webSearch';
-    
+
+    constructor(private _embeddingsCache: EmbeddingsCache) { }
     prepareToolInvocation(options: LanguageModelToolInvocationPrepareOptions<WebSearchToolParameters>, token: CancellationToken): ProviderResult<PreparedToolInvocation> {
         return {
             invocationMessage: l10n.t("Searching the web for '{0}'", options.parameters.query)
@@ -58,6 +60,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
             chunks = await findNaiveChunksBasedOnQuery(
                 urls,
                 options.parameters.query,
+                this._embeddingsCache,
                 {
                     crawl: false,
                 },
@@ -98,13 +101,13 @@ class WebToolCalls extends PromptElement<WebSearchToolProps, void> {
         return <>
             <TextChunk>Here is some relevent context from webpages across the internet:</TextChunk>
             <PrioritizedList priority={100} descending={true}>
-            {
-                this.props.chunks.map(chunk => <TextChunk>{chunk.text}</TextChunk>)
-            }
+                {
+                    this.props.chunks.map(chunk => <TextChunk>{chunk.text}</TextChunk>)
+                }
             </PrioritizedList>
         </>;
     }
 }
 
-{/* <UserMessage name="Chunk URI">{chunk.text}</UserMessage> */}
-{/* <UserMessage name="Chunk Text">{chunk.file.toString()}</UserMessage> */}
+{/* <UserMessage name="Chunk URI">{chunk.text}</UserMessage> */ }
+{/* <UserMessage name="Chunk Text">{chunk.file.toString()}</UserMessage> */ }
