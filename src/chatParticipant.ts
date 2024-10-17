@@ -34,28 +34,6 @@ class WebSearchChatParticipant {
         };
 
         let { messages, references } = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls: [] }, model, token);
-        // const renderer = new PromptRenderer({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls: [] }, new AnyTokenizer(model.countTokens));
-        // let result: RenderPromptResult;
-        // if (this._context.extensionMode === ExtensionMode.Development) {
-        //     const tracer = new HTMLTracer();
-        //     renderer.tracer = tracer;
-        //     result = await renderer.render(undefined, token);
-        //     const server = await tracer.serveHTML();
-        //     await window.withProgress({ location: ProgressLocation.Notification, title: `Tracer server running at ${server.address}`, cancellable: true }, async (progress, token) => {
-        //         await new Promise<void>(resolve => {
-        //             const dispose = token.onCancellationRequested(() => {
-        //                 dispose.dispose();
-        //                 server.dispose();
-        //                 resolve();
-        //             });
-        //         });
-        //     });
-        // } else {
-        //     result = await renderer.render(undefined, token);
-        // }
-        // let messages = toVsCodeChatMessages(result.messages);
-        // let references = result.references;
-        // let { messages, references } = await renderPrompt(ToolUserPrompt, { context, request, toolCalls: [] }, { modelMaxPromptTokens: model.maxInputTokens }, model);
 
         // Put our tool at the very end so that it processes the search query after resolving all other variables
         const toolReferences = [...request.toolReferences.filter(ref => ref.id === WebSearchTool.ID), { id: WebSearchTool.ID }];
@@ -88,32 +66,6 @@ class WebSearchChatParticipant {
                 const result = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls }, model, token);
                 messages = result.messages;
                 references = result.references;
-                // const renderer = new PromptRenderer({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls: [] }, new AnyTokenizer(model.countTokens));
-                // let result: RenderPromptResult;
-                // if (this._context.extensionMode === ExtensionMode.Development) {
-                //     const tracer = new HTMLTracer();
-                //     renderer.tracer = tracer;
-                //     result = await renderer.render(undefined, token);
-                //     const server = await tracer.serveHTML();
-                //     await window.withProgress({ location: ProgressLocation.Notification, title: `Tracer server running at ${server.address}`, cancellable: true }, async (progress, token) => {
-                //         await new Promise<void>(resolve => {
-                //             const dispose = token.onCancellationRequested(() => {
-                //                 dispose.dispose();
-                //                 server.dispose();
-                //                 resolve();
-                //             });
-                //         });
-                //     });
-                // } else {
-                //     result = await renderer.render(undefined, token);
-                // }
-                // messages = toVsCodeChatMessages(result.messages);
-                // references = result.references;
-                // const result = await renderPrompt(
-                //     ToolUserPrompt,
-                //     { context, request, toolCalls },
-                //     { modelMaxPromptTokens: model.maxInputTokens },
-                //     model);
 
                 // RE-enter
                 return runWithFunctions();
