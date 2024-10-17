@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { CancellationToken, l10n, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, Uri, workspace } from "vscode";
+import { CancellationToken, l10n, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
 import { SearchEngineManager } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 import {
@@ -18,7 +18,6 @@ import { FileChunk } from "./webChunk/utils";
 import { IWebSearchResults } from "./search/webSearchTypes";
 import { URI } from "@vscode/prompt-tsx/dist/base/util/vs/common/uri";
 import { TextChunk } from "@vscode/prompt-tsx/dist/base/promptElements";
-import chatState from "./chatState";
 import { EmbeddingsCache, RateLimitReachedError } from "./webChunk/index/embeddings";
 import Logger from "./logger";
 
@@ -44,14 +43,6 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
 
     async invoke(options: LanguageModelToolInvocationOptions<WebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
         const results = await SearchEngineManager.search(options.parameters.query);
-
-        // HACK: This is a temporary workaround to allow the tool to access the chat response stream.
-        // this will render the progress and references in a nicer way.
-        const stream = chatState.get(options.parameters.toolInvocationToken);
-        stream?.progress(l10n.t("Searching the web for '{0}'", options.parameters.query), async (progress) => {
-            results.urls.forEach(({ url }) => progress.report({ value: Uri.parse(url) }));
-            return l10n.t("Found results on the web for '{0}'", options.parameters.query);
-        });
 
         let chunks: FileChunk[];
         if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {
@@ -109,6 +100,7 @@ class WebToolCalls extends PromptElement<WebSearchToolProps, void> {
     render(state: void, sizing: PromptSizing) {
         return <>
             <TextChunk>Here is some relevent context from webpages across the internet:</TextChunk>
+            <references value={this.props.chunks.map(c => (new PromptReference(c.file)))}></references>
             <PrioritizedList priority={100} descending={true}>
                 {
                     this.props.chunks.map(chunk => <TextChunk>{chunk.text}</TextChunk>)
