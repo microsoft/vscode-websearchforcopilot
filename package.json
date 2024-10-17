@@ -4,6 +4,7 @@
 	"displayName": "Web Search for Copilot",
 	"description": "Gives access to search engines from within Copilot",
 	"version": "0.1.0",
+	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.95.0"
 	},
