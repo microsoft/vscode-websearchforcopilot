@@ -8,12 +8,14 @@ import { registerChatParticipant } from './chatParticipant';
 import { WebSearchTool } from './chatTool';
 import Logger from './logger';
 import { ApiKeySecretStorage } from './auth/secretStorage';
+import { toggleTracing } from './promptTracing';
 
 export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(Logger);
     await registerAuthProviders(context);
     registerChatTools(context);
     registerChatParticipant(context);
+    registerCommands(context);
 }
 
 async function registerAuthProviders(context: vscode.ExtensionContext) {
@@ -35,4 +37,8 @@ async function registerAuthProviders(context: vscode.ExtensionContext) {
 
 function registerChatTools(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.lm.registerTool(WebSearchTool.ID, new WebSearchTool()));
+}
+
+function registerCommands(context: vscode.ExtensionContext) {
+    context.subscriptions.push(vscode.commands.registerCommand('vscode-websearchchattools.toggleWebSearchPromptTracer', () => toggleTracing(context.extensionMode)));
 }

@@ -48,7 +48,14 @@
 				}
 			}
 		],
-		"commands": [],
+		"commands": [
+			{
+				"command": "vscode-websearchchattools.toggleWebSearchPromptTracer",
+				"category": "Web Search",
+				"enablement": "isDevelopment",
+				"title": "Toggle Web Search Prompt Tracer"
+			}
+		],
 		"chatParticipants": [
 			{
 				"id": "vscode-websearchparticipant.websearch",
