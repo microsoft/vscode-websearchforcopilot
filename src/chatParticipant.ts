@@ -6,7 +6,6 @@ import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatRes
 import { ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
 import Logger from "./logger";
-import chatState from "./chatState";
 import { renderPrompt } from "./promptTracing";
 
 class WebSearchChatParticipant {
@@ -61,8 +60,6 @@ class WebSearchChatParticipant {
             }
 
             if (toolCalls.length) {
-                // Store the stream so that the tool can reference it
-                chatState.set(request.toolInvocationToken, stream);
                 const result = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls }, model, token);
                 messages = result.messages;
                 references = result.references;
