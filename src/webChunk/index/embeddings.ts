@@ -199,7 +199,7 @@ export class EmbeddingsIndex {
 
             if (isUnexpected(response)) {
                 if (response.status === '429') {
-                    throw new RateLimitReachedError(response.body.error.message);
+                    throw new RateLimitReachedError(`Embeddings: ${response.body.error.message}`);
                 } else {
                     throw response.body.error;
                 }

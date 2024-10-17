@@ -70,7 +70,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
                 );
             } catch (e) {
                 if (e instanceof RateLimitReachedError) {
-                    Logger.error(`Rate limit reached: ${e.message}`);
+                    Logger.error(e.message);
                 }
                 // use the search results directly
                 chunks = this.toFileChunks(results);
