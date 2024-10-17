@@ -3,8 +3,8 @@
 Get the most up-to-date and relevant information from the web right in Copilot.
 
 This is powered by one of two different Search Engines:
-* Tavily (default)
-* Bing
+* [Tavily](http://tavily.com) (default)
+* [Bing](https://bing.com)
 
 You can configure this with the `websearch.preferredEngine` setting. ([VS Code deeplink](vscode://settings/websearch.preferredEngine), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.preferredEngine))
 
