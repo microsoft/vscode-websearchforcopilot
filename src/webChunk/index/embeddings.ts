@@ -211,13 +211,10 @@ export class EmbeddingsIndex {
         const inputs = Array.from(text);
         const ret = [];
 
-        const overloadLimit = 1000;
         const groups = await this.batchChunksIntoGroups(inputs, 50000); // limit ~64k
 
-        for (let i = 0; i < overloadLimit; i += 1) {
-            for (const group of groups) {
-                ret.push(...await sendReq(group));
-            }
+        for (const group of groups) {
+            ret.push(...await sendReq(group));
         }
 
         return ret;
