@@ -6,7 +6,7 @@ This is powered by one of two different Search Engines:
 * [Tavily](http://tavily.com) (default)
 * [Bing](https://bing.com)
 
-You can configure this with the `websearch.preferredEngine` setting. ([VS Code deeplink](vscode://settings/websearch.preferredEngine), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.preferredEngine))
+You can configure this with the `websearch.preferredEngine` setting.
 
 You'll need to acquire an API key from one of these services to use this extension. Upon first use, it will ask you for that key and store it using VS Code's built-in secret storage, and can be managed via VS Code's authentication stack as well just as you would for your GitHub account.
 
