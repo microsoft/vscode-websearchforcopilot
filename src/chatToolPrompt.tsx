@@ -12,14 +12,16 @@ import {
     PromptPiece,
     PromptSizing,
     UserMessage,
+    PromptMetadata,
 } from '@vscode/prompt-tsx';
-import { TextChunk, ToolMessage } from '@vscode/prompt-tsx/dist/base/promptElements';
-import { CancellationToken, CancellationTokenSource, ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, ChatRequestTurn, ChatResponseAnchorPart, ChatResponseMarkdownPart, ChatResponseTurn, l10n, LanguageModelToolCallPart, LanguageModelToolDescription, LanguageModelToolInvocationOptions, lm, Location, Uri, workspace } from 'vscode';
+import { Chunk, TextChunk, ToolCall, ToolMessage, ToolResult } from '@vscode/prompt-tsx/dist/base/promptElements';
+import { CancellationToken, CancellationTokenSource, ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, ChatRequestTurn, ChatResponseAnchorPart, ChatResponseMarkdownPart, ChatResponseTurn, l10n, LanguageModelPromptTsxPart, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelToolResult, LanguageModelToolTokenizationOptions, lm, Location, Uri, workspace } from 'vscode';
 
 export interface ToolUserProps extends BasePromptElementProps {
     request: ChatRequest;
     context: ChatContext;
-    toolCalls: LanguageModelToolCallPart[];
+    toolCallRounds: ToolCallRound[];
+	toolCallResults: Record<string, LanguageModelToolResult>;
 }
 
 export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
@@ -42,7 +44,8 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
                     - Don't ask the user for confirmation to use tools, just use them.<br />
                     - After editing a file, DO NOT show the user a codeblock with the
                     edit or new file contents. Assume that the user can see the result.<br />
-                    - DO NOT CALL multi_tool_use.parallel FOR ANY REASON. This is a special tool for internal use only.
+                    - DO NOT CALL multi_tool_use.parallel FOR ANY REASON. This is a special tool for internal use only.<br />
+                    - Today's date is {new Date().toLocaleDateString()} so keep that in mind.
                 </UserMessage>
                 {/* Give older History messages less priority and have them flexGrow last */}
                 <History
@@ -72,77 +75,103 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
                 {/* It's the prompt, it needs a higher priority than any of the above */}
                 <UserMessage priority={50}>{this.props.request.prompt}</UserMessage>
                 {/* Tool calls are slightly more important than references and are given the opportunity to flexGrow before anything else */}
-                <ToolCalls priority={40} toolCalls={this.props.toolCalls} toolInvocationToken={this.props.request.toolInvocationToken} flexGrow={1}></ToolCalls>
+                <ToolCalls
+					toolCallRounds={this.props.toolCallRounds}
+					toolInvocationToken={this.props.request.toolInvocationToken}
+					toolCallResults={this.props.toolCallResults}>
+				</ToolCalls>
             </>
         );
     }
 }
 
-export interface ToolCallsProps extends BasePromptElementProps {
-    toolCalls: LanguageModelToolCallPart[];
-    toolInvocationToken: ChatParticipantToolToken;
+export interface ToolCallRound {
+	response: string;
+	toolCalls: LanguageModelToolCallPart[];
 }
 
-class ToolCalls extends PromptElement<ToolCallsProps, void> {
-    render(state: void, sizing: PromptSizing) {
-        const assistantToolCalls: any[] = this.props.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.parameters) }, id: tc.toolCallId }));
-        return <>
-            <AssistantMessage toolCalls={assistantToolCalls}>todo</AssistantMessage>
-            {this.props.toolCalls.map(toolCall => {
-                const tool = lm.tools.find(t => t.name === toolCall.name);
-                if (!tool) {
-                    console.error(l10n.t('Tool not found: {0}', toolCall.name));
-                    return undefined;
-                }
-
-                return <ToolCall tool={tool} toolCall={toolCall} toolInvocationToken={this.props.toolInvocationToken}></ToolCall>;
-            })}
-            <UserMessage priority={100}>Above is the result of calling one or more tools. The user cannot see the results, so you should explain them to the user if referencing them in your answer.</UserMessage>
-        </>;
-    }
+interface ToolCallsProps extends BasePromptElementProps {
+	toolCallRounds: ToolCallRound[];
+	toolCallResults: Record<string, LanguageModelToolResult>;
+	toolInvocationToken: ChatParticipantToolToken | undefined;
 }
-
-interface ToolCallProps extends BasePromptElementProps {
-    tool: LanguageModelToolDescription;
-    toolCall: LanguageModelToolCallPart;
-    toolInvocationToken: ChatParticipantToolToken;
-}
-
-const agentSupportedContentTypes = [promptTsxContentType, 'text/plain'];
 
 const dummyCancellationToken: CancellationToken = new CancellationTokenSource().token;
-export class ToolCall extends PromptElement<ToolCallProps, void> {
-    async render(state: void, sizing: PromptSizing) {
-        const contentType = agentSupportedContentTypes.find(type => this.props.tool.supportedContentTypes.includes(type));
-        if (!contentType) {
-            console.error(l10n.t('Tool does not support any of the agent\'s content types: {0}', this.props.tool.name));
-            return <ToolMessage toolCallId={this.props.toolCall.toolCallId}>Tool unsupported</ToolMessage>;
-        }
 
-        // Would be nice if this could just be `sizing`... their types are nearly the same.
-        const tokenOptions: LanguageModelToolInvocationOptions<unknown>['tokenOptions'] = {
-            tokenBudget: sizing.tokenBudget,
-            countTokens: async (content: string) => sizing.countTokens(content),
-        };
+class ToolCalls extends PromptElement<ToolCallsProps, void> {
+	async render(state: void, sizing: PromptSizing) {
+		if (!this.props.toolCallRounds.length) {
+			return undefined;
+		}
 
-        const result = await lm.invokeTool(
-            this.props.toolCall.name,
-            {
-                parameters: this.props.toolCall.parameters,
-                requestedContentTypes: [contentType],
-                toolInvocationToken: this.props.toolInvocationToken,
-                tokenOptions
-            },
-            dummyCancellationToken
-        );
-        return <>
-            <ToolMessage toolCallId={this.props.toolCall.toolCallId}>
-                {contentType === 'text/plain' ?
-                    result[contentType] :
-                    <elementJSON data={result[contentType]}></elementJSON>}
-            </ToolMessage>
-        </>;
-    }
+		// Note- the final prompt must end with a UserMessage
+		return <>
+			{this.props.toolCallRounds.map(round => this.renderOneToolCallRound(round))}
+			<UserMessage>Above is the result of calling one or more tools. The user cannot see the results, so you should explain them to the user if referencing them in your answer.</UserMessage>
+		</>
+	}
+
+	private renderOneToolCallRound(round: ToolCallRound) {
+		const assistantToolCalls: ToolCall[] = round.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.parameters) }, id: tc.callId }));
+		// TODO- just need to adopt prompt-tsx update in vscode-copilot
+		return (
+			<Chunk>
+				<AssistantMessage toolCalls={assistantToolCalls}>{round.response}</AssistantMessage>
+				{round.toolCalls.map(toolCall =>
+					<ToolCallElement toolCall={toolCall} toolInvocationToken={this.props.toolInvocationToken} toolCallResult={this.props.toolCallResults[toolCall.callId]}></ToolCallElement>)}
+			</Chunk>);
+	}
+}
+
+interface ToolCallElementProps extends BasePromptElementProps {
+	toolCall: LanguageModelToolCallPart;
+	toolInvocationToken: ChatParticipantToolToken | undefined;
+	toolCallResult: LanguageModelToolResult | undefined;
+}
+
+class ToolCallElement extends PromptElement<ToolCallElementProps, void> {
+	async render(state: void, sizing: PromptSizing): Promise<PromptPiece | undefined> {
+		const tool = lm.tools.find(t => t.name === this.props.toolCall.name);
+		if (!tool) {
+			console.error(`Tool not found: ${this.props.toolCall.name}`);
+			return <ToolMessage toolCallId={this.props.toolCall.callId}>Tool not found</ToolMessage>;
+		}
+
+		const tokenizationOptions: LanguageModelToolTokenizationOptions = {
+			tokenBudget: sizing.tokenBudget,
+			countTokens: async (content: string) => sizing.countTokens(content),
+		};
+
+		const toolResult = this.props.toolCallResult ??
+			await lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, toolInvocationToken: this.props.toolInvocationToken, tokenizationOptions }, dummyCancellationToken);
+
+		// Important- since these parts may have been serialized/deserialized via ChatResult metadata, we need to check their types
+		// in a more flexible way. Extensions should not have to do this, vscode will have a better solution in the future.
+		toolResult.content = toolResult.content.map(part => {
+			if (part instanceof LanguageModelTextPart || part instanceof LanguageModelPromptTsxPart) {
+				return part;
+			} else if ((part as LanguageModelPromptTsxPart).mime) {
+				return new LanguageModelPromptTsxPart((part as LanguageModelPromptTsxPart).value, (part as LanguageModelPromptTsxPart).mime);
+			} else if (typeof (part as LanguageModelTextPart).value === 'string') {
+				return new LanguageModelTextPart((part as LanguageModelTextPart).value);
+			}
+		});
+		return (
+			<ToolMessage toolCallId={this.props.toolCall.callId}>
+				<meta value={new ToolResultMetadata(this.props.toolCall.callId, toolResult)}></meta>
+				<ToolResult data={toolResult} />
+			</ToolMessage>
+		);
+	}
+}
+
+export class ToolResultMetadata extends PromptMetadata {
+	constructor(
+		public toolCallId: string,
+		public result: LanguageModelToolResult,
+	) {
+		super();
+	}
 }
 
 interface HistoryProps extends BasePromptElementProps {

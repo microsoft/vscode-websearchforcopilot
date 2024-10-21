@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { CancellationToken, l10n, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
+import { CancellationToken, l10n, LanguageModelPromptTsxPart, LanguageModelTextPart, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
 import { SearchEngineManager } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 import {
@@ -23,8 +23,6 @@ import Logger from "./logger";
 
 export interface WebSearchToolParameters {
     query: string;
-    // HACK: This is a temporary workaround to allow the tool to access the chat response stream
-    toolInvocationToken: unknown;
 }
 
 interface WebSearchToolProps extends BasePromptElementProps {
@@ -35,7 +33,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
     static ID = 'vscode-websearchforcopilot_webSearch';
 
     constructor(private _embeddingsCache: EmbeddingsCache) { }
-    prepareToolInvocation(options: LanguageModelToolInvocationPrepareOptions<WebSearchToolParameters>, token: CancellationToken): ProviderResult<PreparedToolInvocation> {
+    prepareInvocation(options: LanguageModelToolInvocationPrepareOptions<WebSearchToolParameters>, token: CancellationToken): ProviderResult<PreparedToolInvocation> {
         return {
             invocationMessage: l10n.t("Searching the web for '{0}'", options.parameters.query)
         };
@@ -67,23 +65,17 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
                 chunks = this.toFileChunks(results);
             }
         }
-        const response: LanguageModelToolResult = {};
-        for (const contentType of options.requestedContentTypes) {
-            switch (contentType) {
-                case 'text/plain':
-                    response['text/plain'] = `Here is some relevent context from webpages across the internet:\n${JSON.stringify(chunks)}`;
-                    break;
-                case promptTsxContentType:
-                    response[promptTsxContentType] = await renderElementJSON(
-                        WebToolCalls,
-                        { chunks },
-                        options.tokenOptions,
-                        token
-                    );
-            }
-        }
 
-        return response;
+        const promptTsxResult = await renderElementJSON(
+            WebToolCalls,
+            { chunks },
+            options.tokenizationOptions,
+            token
+        );
+        return new LanguageModelToolResult([
+            new LanguageModelTextPart(`Here is some relevent context from webpages across the internet:\n${JSON.stringify(chunks)}`),
+            new LanguageModelPromptTsxPart(promptTsxResult, promptTsxContentType)
+        ]);
     }
 
     toFileChunks(webResults: IWebSearchResults): FileChunk[] {

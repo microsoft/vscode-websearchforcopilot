@@ -2,11 +2,20 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri, l10n } from "vscode";
-import { ToolUserPrompt } from "./chatToolPrompt";
+import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri, l10n, LanguageModelChatToolMode, LanguageModelToolResult } from "vscode";
+import { ToolCallRound, ToolResultMetadata, ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
 import Logger from "./logger";
 import { renderPrompt } from "./promptTracing";
+
+export interface TsxToolUserMetadata {
+    toolCallsMetadata: ToolCallsMetadata;
+}
+
+export interface ToolCallsMetadata {
+    toolCallRounds: ToolCallRound[];
+    toolCallResults: Record<string, LanguageModelToolResult>;
+}
 
 class WebSearchChatParticipant {
     constructor(private readonly _context: ExtensionContext) { }
@@ -32,17 +41,30 @@ class WebSearchChatParticipant {
             justification: l10n.t('To analyze web search results and summarize an answer'),
         };
 
-        let { messages, references } = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls: [] }, model, token);
+        let { messages, references } = await renderPrompt(
+            { modelMaxPromptTokens: model.maxInputTokens },
+            ToolUserPrompt,
+            {
+                context,
+                request,
+                toolCallRounds: [],
+                toolCallResults: {}
+            },
+            model,
+            token
+        );
 
         // Put our tool at the very end so that it processes the search query after resolving all other variables
-        const toolReferences = [...request.toolReferences.filter(ref => ref.id === WebSearchTool.ID), { id: WebSearchTool.ID }];
+        const toolReferences = [...request.toolReferences.filter(ref => ref.name === WebSearchTool.ID), { name: WebSearchTool.ID }];
+        const accumulatedToolResults: Record<string, LanguageModelToolResult> = {};
+        const toolCallRounds: ToolCallRound[] = [];
         const runWithFunctions = async (): Promise<void> => {
             const requestedTool = toolReferences.shift();
             if (requestedTool) {
-                options.toolChoice = requestedTool.id;
-                options.tools = allTools.filter(tool => tool.name === requestedTool.id);
+                options.toolMode = LanguageModelChatToolMode.Required;
+                options.tools = allTools.filter(tool => tool.name === requestedTool.name);
             } else {
-                options.toolChoice = undefined;
+                options.toolMode = undefined;
                 options.tools = allTools;
             }
 
@@ -60,10 +82,29 @@ class WebSearchChatParticipant {
             }
 
             if (toolCalls.length) {
-                const result = await renderPrompt({ modelMaxPromptTokens: model.maxInputTokens }, ToolUserPrompt, { context, request, toolCalls }, model, token);
+                toolCallRounds.push({
+                    response: responseStr,
+                    toolCalls
+                });
+                const result = await renderPrompt(
+                    { modelMaxPromptTokens: model.maxInputTokens },
+                    ToolUserPrompt,
+                    {
+                        context,
+                        request,
+                        toolCallRounds,
+                        toolCallResults: accumulatedToolResults
+                    },
+                    model,
+                    token
+                );
                 messages = result.messages;
                 references = result.references;
 
+                const toolResultMetadata = result.metadatas.getAll(ToolResultMetadata);
+                if (toolResultMetadata?.length) {
+                    toolResultMetadata.forEach(meta => accumulatedToolResults[meta.toolCallId] = meta.result);
+                }
                 // RE-enter
                 return runWithFunctions();
             }
@@ -74,6 +115,15 @@ class WebSearchChatParticipant {
             // TODO: why `as`?
             stream.reference(ref.anchor as Uri);
         }
+
+        return {
+            metadata: {
+                toolCallsMetadata: {
+                    toolCallResults: accumulatedToolResults,
+                    toolCallRounds
+                }
+            } satisfies TsxToolUserMetadata
+        };
     };
 }
 

@@ -38,6 +38,7 @@ export async function renderPrompt<P extends BasePromptElementProps>(endpoint: I
 
     return {
         messages: toVsCodeChatMessages(result.messages) as LanguageModelChatMessage[],
-        references: result.references
+        references: result.references,
+        metadatas: result.metadata,
     };
 }
