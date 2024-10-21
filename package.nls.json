@@ -1,5 +1,5 @@
 {
-    "configuration.webSearch.title": "Web Search",
+    "configuration.webSearch.title": "Web Search for Copilot",
     "config.useSearchResultsDirectly.description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks.",
     "config.preferredEngine.description": "The preferred search engine to use for web search.",
     "command.scrapeAndGetNaiveChunks.title": "Scrape and Show Related Naive Chunks Ranked by Embeddings",

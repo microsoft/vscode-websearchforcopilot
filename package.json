@@ -13,7 +13,7 @@
 	],
 	"activationEvents": [],
 	"enabledApiProposals": [
-		"lmTools"
+		"lmTools@10"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {

@@ -36,8 +36,8 @@ API.
 
 ### Settings
 
-* `websearch.preferredEngine` ([VS Code deeplink](vscode://settings/websearch.preferredEngine), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.preferredEngine)) - Configure the desired search engine.
-* `websearch.useSearchResultsDirectly` ([VS Code deeplink](vscode://settings/websearch.useSearchResultsDirectly), [VS Code Insiders deeplink](vscode-insiders://settings/websearch.useSearchResultsDirectly)) - Skip the post processing of search results and use raw search results from the search engine instead.
+* `websearch.preferredEngine` - Configure the desired search engine.
+* `websearch.useSearchResultsDirectly` - Skip the post processing of search results and use raw search results from the search engine instead.
 
 ## Trademarks
 
