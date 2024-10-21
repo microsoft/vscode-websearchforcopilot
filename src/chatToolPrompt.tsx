@@ -108,7 +108,7 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
 		return <>
 			{this.props.toolCallRounds.map(round => this.renderOneToolCallRound(round))}
 			<UserMessage>Above is the result of calling one or more tools. The user cannot see the results, so you should explain them to the user if referencing them in your answer.</UserMessage>
-		</>
+		</>;
 	}
 
 	private renderOneToolCallRound(round: ToolCallRound) {
