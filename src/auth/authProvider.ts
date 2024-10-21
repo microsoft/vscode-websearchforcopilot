@@ -188,7 +188,7 @@ export class BingAuthProvider extends BaseAuthProvider {
 
 	protected readonly name = BingAuthProvider.NAME;
 
-	protected readonly createKeyUrl = 'https://portal.azure.com/#browse/Microsoft.Bing%2Faccounts';
+	protected readonly createKeyUrl = 'https://www.microsoft.com/en-us/bing/apis/bing-web-search-api';
 
 	protected async validateKey(key: string): Promise<boolean> {
 		try {
