@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { CancellationToken, l10n, LanguageModelPromptTsxPart, LanguageModelTextPart, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, workspace } from "vscode";
+import { CancellationToken, l10n, LanguageModelPromptTsxPart, LanguageModelTextPart, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, Uri, workspace } from "vscode";
 import { SearchEngineManager } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 import {
@@ -16,7 +16,6 @@ import {
 } from '@vscode/prompt-tsx';
 import { FileChunk } from "./webChunk/utils";
 import { IWebSearchResults } from "./search/webSearchTypes";
-import { URI } from "@vscode/prompt-tsx/dist/base/util/vs/common/uri";
 import { TextChunk } from "@vscode/prompt-tsx/dist/base/promptElements";
 import { EmbeddingsCache, RateLimitReachedError } from "./webChunk/index/embeddings";
 import Logger from "./logger";
@@ -57,6 +56,10 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
                     },
                     token
                 );
+                // patch the urls with the snippets
+                for (const chunk of chunks) {
+                    chunk.file = this.addHighlightFragment(chunk.file, chunk.text);
+                }
             } catch (e) {
                 if (e instanceof RateLimitReachedError) {
                     Logger.error(e.message);
@@ -81,10 +84,40 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
     toFileChunks(webResults: IWebSearchResults): FileChunk[] {
         return webResults.urls.map((url) => {
             return {
-                file: URI.parse(url.url),
+                file: this.addHighlightFragment(Uri.parse(url.url), url.snippet),
                 text: `TITLE: ${url.title}\nSNIPPET:${url.snippet}`,
             };
         });
+    }
+
+    /**
+     * Adds the scroll-to-text fragment to the uri if possible. This uses the following format:
+     * `:~:text=<prefix>,<suffix>` where `<prefix>` and `<suffix>` are the first and last few words of the text to highlight and scroll to.
+     * 
+     * @link https://github.com/WICG/scroll-to-text-fragment
+     * @param file The uri to add the fragment to
+     * @param text The text to add to the fragment
+     * @returns A new instance of the uri with the fragment added
+     */
+    addHighlightFragment(file: Uri, text: string | undefined): Uri {
+        if (file.fragment || !text) {
+            // We don't want to stomp the existing fragment
+            return file;
+        }
+
+        // First split by commas and newlines to make the text easier to turn into the format
+        const splitSnippet = text.split(/[,\r\n]/);
+        // Grab the first few words of the first non-empty array element
+        const firstWords = splitSnippet.find(snippet => snippet.trim() !== '')?.split(' ').slice(0, 5).join(' ');
+        if (!firstWords) {
+            return file;
+        }
+        // Grab the last few words of the last non-empty array element
+        const lastWords = splitSnippet.reverse().find(snippet => snippet.trim() !== '')?.split(' ').slice(-5).join(' ');
+        // Combine the first and last words with a comma if both exist, otherwise just use the first words
+        const fragment = lastWords ? `${firstWords},${lastWords}` : firstWords;
+        // Finally update the uri with the fragment
+        return file.with({ fragment: `:~:text=${fragment}` });
     }
 }
 

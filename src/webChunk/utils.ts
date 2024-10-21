@@ -122,8 +122,8 @@ export class ResourceMap<T> implements Map<URI, T> {
 }
 
 export interface FileChunk {
-    readonly text: string;
-    readonly file: URI;
+    text: string;
+    file: URI;
 }
 
 export interface Page {
@@ -137,7 +137,7 @@ export interface Section {
 }
 
 export function getDocumentFromPage(page: Page): string {
-    const strBuffer: string[] = [page.url, ''];
+    const strBuffer: string[] = [];
 
     for (const p of page.sections) {
         strBuffer.push(...sectionToString(p));
