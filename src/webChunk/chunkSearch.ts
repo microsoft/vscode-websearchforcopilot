@@ -17,17 +17,5 @@ export async function findNaiveChunksBasedOnQuery(
 
     const result = await index.search(query, maxResults ?? 5, token);
 
-    // Convert the result to a string (assuming result is an array or object)
-    const resultString = JSON.stringify(result, null, 2);
-
-
-    const document = await vscode.workspace.openTextDocument({
-        language: 'plaintext', // You can specify the language mode here
-        content: resultString
-    });
-
-    // Show the new text document in the editor
-    await vscode.window.showTextDocument(document);
-
     return result;
 }
