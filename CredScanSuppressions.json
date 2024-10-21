@@ -1,0 +1,11 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "file": [
+                "l10n/bundle.l10n.qps-ploc.json"
+            ],
+            "_justification": "False positive. It's just pseudolocalization that _looks_ like an API Key but it's not."
+        }
+    ]
+}

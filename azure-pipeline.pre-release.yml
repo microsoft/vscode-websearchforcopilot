@@ -27,6 +27,7 @@ parameters:
 extends:
   template: azure-pipelines/extension/pre-release.yml@templates
   parameters:
+    credscanSuppressionsFile: $(Build.SourcesDirectory)/CredScanSuppressions.json
     standardizedVersioning: true
     l10nSourcePaths: ./src
     publishExtension: ${{ parameters.publishExtension }}

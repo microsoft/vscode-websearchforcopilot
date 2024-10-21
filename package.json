@@ -15,6 +15,7 @@
 	"enabledApiProposals": [
 		"lmTools"
 	],
+	"l10n": "./l10n",
 	"main": "./dist/extension.js",
 	"contributes": {
 		"authentication": [
