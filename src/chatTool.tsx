@@ -77,7 +77,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
         );
         return new LanguageModelToolResult([
             new LanguageModelTextPart(`Here is some relevent context from webpages across the internet:\n${JSON.stringify(chunks)}`),
-            new LanguageModelPromptTsxPart(promptTsxResult, promptTsxContentType)
+            new LanguageModelPromptTsxPart(promptTsxResult)
         ]);
     }
 
