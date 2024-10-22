@@ -30,6 +30,7 @@ extends:
     credscanSuppressionsFile: $(Build.SourcesDirectory)/CredScanSuppressions.json
     standardizedVersioning: true
     l10nSourcePaths: ./src
+    customNPMRegistry: ''
     publishExtension: ${{ parameters.publishExtension }}
     buildSteps:
       - script: npm ci

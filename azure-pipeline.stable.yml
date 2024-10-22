@@ -26,6 +26,7 @@ extends:
   parameters:
     credscanSuppressionsFile: $(Build.SourcesDirectory)/CredScanSuppressions.json
     l10nSourcePaths: ./src
+    customNPMRegistry: ''
     publishExtension: ${{ parameters.publishExtension }}
     buildSteps:
       - script: npm ci
