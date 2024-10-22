@@ -21,12 +21,7 @@ class WebSearchChatParticipant {
     constructor(private readonly _context: ExtensionContext) { }
 
     handler: ChatRequestHandler = async (request: ChatRequest, context: ChatContext, stream: ChatResponseStream, token: CancellationToken) => {
-        const models = await lm.selectChatModels({
-            vendor: 'copilot',
-            family: 'gpt-4o'
-        });
-
-        const model = models[0];
+        const model = request.model;
         Logger.debug(`Using model ${model.name}`);
 
         const allTools = lm.tools.map((tool): LanguageModelChatTool => {
