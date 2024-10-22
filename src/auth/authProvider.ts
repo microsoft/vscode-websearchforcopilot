@@ -101,13 +101,22 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 
 		// Get a name for the session
 		input.buttons = [];
-		input.value = '';
+		input.value = 'Default'; // Set default value to 'Default'
 		input.step = 2;
 		input.placeholder = l10n.t('Enter a name for this account');
 		input.busy = false;
 		input.enabled = true;
+
+		input.onDidChangeValue((value) => {
+			input.validationMessage = !value ? l10n.t('Name cannot be empty') : undefined;
+		});
+
 		const name: string = await new Promise((resolve, reject) => {
 			input.onDidAccept(() => {
+				if (!input.value) {
+					input.validationMessage = l10n.t('Name cannot be empty');
+					return;
+				}
 				input.dispose();
 				resolve(input.value);
 			});
