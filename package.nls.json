@@ -1,6 +1,6 @@
 {
     "configuration.webSearch.title": "Web Search for Copilot",
-    "config.useSearchResultsDirectly.description": "If true, the web search will use the search results directly. If false, the web search will use the search results to get the chunks.",
+    "config.useSearchResultsDirectly.description": "If true, web search will use the search results from the search engine directly (faster but less accurate). If false, web search will post process the search results to find the most relevant content (slower but more accurate).",
     "config.preferredEngine.description": "The preferred search engine to use for web search.",
     "command.scrapeAndGetNaiveChunks.title": "Scrape and Show Related Naive Chunks Ranked by Embeddings",
     "command.tavilyScrapeAndGetChunks.title": "Scrape and Show Related Tavily Chunks",
