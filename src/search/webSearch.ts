@@ -90,16 +90,27 @@ export class BingEngine {
 		);
 
 		const raw = await response.json();
-		const result: IWebSearchResults = {
-			urls: raw.webPages.value.map((x: any) => {
-				return {
-					url: x.url,
-					title: x.name,
-					snippet: x.snippet,
-				};
-			}),
-			answer: raw.webPages.value[0].snippet,
-		};
-		return result;
+
+		if (raw.errors) {
+			if (raw.errors.length === 1) {
+				throw new Error(raw.errors[0].message);
+			} else {
+				throw new AggregateError(raw.errors.map((e: any) => new Error(e.message)));
+			}
+		}
+		if (raw.webPages) {
+			const result: IWebSearchResults = {
+				urls: raw.webPages.value.map((x: any) => {
+					return {
+						url: x.url,
+						title: x.name,
+						snippet: x.snippet,
+					};
+				}),
+				answer: raw.webPages.value[0].snippet,
+			};
+			return result;
+		}
+		throw new Error('Unexpected response from Bing search API');
 	}
 }
