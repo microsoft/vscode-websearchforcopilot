@@ -55,6 +55,7 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 
 		// Get API Key
 		input.step = 1;
+		input.password = true;
 		const placeholderText = l10n.t('Enter your {0} API key', this.name);
 		input.placeholder = placeholderText;
 		input.ignoreFocusOut = true;
@@ -103,6 +104,7 @@ export abstract class BaseAuthProvider implements AuthenticationProvider {
 		input.buttons = [];
 		input.value = 'Default'; // Set default value to 'Default'
 		input.step = 2;
+		input.password = false;
 		input.placeholder = l10n.t('Enter a name for this account');
 		input.busy = false;
 		input.enabled = true;
