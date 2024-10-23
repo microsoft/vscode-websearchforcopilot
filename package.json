@@ -102,11 +102,7 @@
 					"required": [
 						"query"
 					]
-				},
-				"supportedContentTypes": [
-					"text/plain",
-					"application/vnd.codechat.prompt+json.1"
-				]
+				}
 			}
 		]
 	},
