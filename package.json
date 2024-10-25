@@ -5,6 +5,13 @@
 	"description": "Gives access to search engines from within Copilot",
 	"version": "0.1.1",
 	"icon": "icon.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/microsoft/vscode-websearchforcopilot.git"
+	},
+	"bugs": {
+		"url": "https://github.com/microsoft/vscode-websearchforcopilot/issues"
+	},
 	"engines": {
 		"vscode": "^1.95.0"
 	},
