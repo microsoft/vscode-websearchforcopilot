@@ -1,5 +1,14 @@
 ## Web Search for Copilot
 
+This extension showcases:
+
+* Chat Participant & Tool APIs
+* [prompt-tsx](https://github.com/microsoft/vscode-prompt-tsx)
+* How to leverage the language models provided by GitHub Copilot
+* Leveraging the Authentication & Secret Storage API to handle API keys provided by users
+
+### Description
+
 Get the most up-to-date and relevant information from the web right in Copilot.
 
 This is powered by one of two different Search Engines:
