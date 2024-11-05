@@ -111,7 +111,7 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
 	}
 
 	private renderOneToolCallRound(round: ToolCallRound) {
-		const assistantToolCalls: ToolCall[] = round.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.parameters) }, id: tc.callId }));
+		const assistantToolCalls: ToolCall[] = round.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.input) }, id: tc.callId }));
 		// TODO- just need to adopt prompt-tsx update in vscode-copilot
 		return (
 			<Chunk>
@@ -142,7 +142,7 @@ class ToolCallElement extends PromptElement<ToolCallElementProps, void> {
 		};
 
 		const toolResult = this.props.toolCallResult ??
-			await lm.invokeTool(this.props.toolCall.name, { parameters: this.props.toolCall.parameters, toolInvocationToken: this.props.toolInvocationToken, tokenizationOptions }, dummyCancellationToken);
+			await lm.invokeTool(this.props.toolCall.name, { input: this.props.toolCall.input, toolInvocationToken: this.props.toolInvocationToken, tokenizationOptions }, dummyCancellationToken);
 		return (
 			<ToolMessage toolCallId={this.props.toolCall.callId}>
 				<meta value={new ToolResultMetadata(this.props.toolCall.callId, toolResult)}></meta>
