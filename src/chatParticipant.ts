@@ -28,7 +28,7 @@ class WebSearchChatParticipant {
             return {
                 name: tool.name,
                 description: tool.description,
-                parametersSchema: tool.parametersSchema ?? {}
+                inputSchema: tool.inputSchema ?? {}
             };
         });
 

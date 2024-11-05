@@ -34,12 +34,12 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
     constructor(private _embeddingsCache: EmbeddingsCache) { }
     prepareInvocation(options: LanguageModelToolInvocationPrepareOptions<WebSearchToolParameters>, token: CancellationToken): ProviderResult<PreparedToolInvocation> {
         return {
-            invocationMessage: l10n.t("Searching the web for '{0}'", options.parameters.query)
+            invocationMessage: l10n.t("Searching the web for '{0}'", options.input.query)
         };
     }
 
     async invoke(options: LanguageModelToolInvocationOptions<WebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
-        const results = await SearchEngineManager.search(options.parameters.query);
+        const results = await SearchEngineManager.search(options.input.query);
 
         let chunks: FileChunk[];
         if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {
@@ -49,7 +49,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
             try {
                 chunks = await findNaiveChunksBasedOnQuery(
                     urls,
-                    options.parameters.query,
+                    options.input.query,
                     this._embeddingsCache,
                     {
                         crawl: false,
