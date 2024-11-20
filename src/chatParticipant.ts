@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { ExtensionContext, ChatRequestHandler, ChatRequest, ChatContext, ChatResponseStream, CancellationToken, lm, LanguageModelChatRequestOptions, chat, ThemeIcon, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelChatTool, Uri, l10n, LanguageModelChatToolMode, LanguageModelToolResult } from "vscode";
-import { ToolCallRound, ToolResultMetadata, ToolUserPrompt } from "./chatToolPrompt";
+import { ToolCallRound, ToolUserPrompt } from "./chatToolPrompt";
 import { WebSearchTool } from "./chatTool";
 import Logger from "./logger";
 import { renderPrompt } from "./promptTracing";
+import { ToolResultMetadata } from '@vscode/prompt-tsx-elements';
 
 export interface TsxToolUserMetadata {
     toolCallsMetadata: ToolCallsMetadata;

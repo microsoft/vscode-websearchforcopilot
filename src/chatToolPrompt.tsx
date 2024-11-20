@@ -5,16 +5,14 @@
 import {
     AssistantMessage,
     BasePromptElementProps,
-    PrioritizedList,
     PromptElement,
-    PromptElementProps,
     PromptPiece,
     PromptSizing,
-    UserMessage,
-    PromptMetadata,
+    UserMessage
 } from '@vscode/prompt-tsx';
-import { Chunk, TextChunk, ToolCall, ToolMessage, ToolResult } from '@vscode/prompt-tsx/dist/base/promptElements';
-import { CancellationToken, CancellationTokenSource, ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, ChatRequestTurn, ChatResponseAnchorPart, ChatResponseMarkdownPart, ChatResponseTurn, l10n, LanguageModelPromptTsxPart, LanguageModelTextPart, LanguageModelToolCallPart, LanguageModelToolResult, LanguageModelToolTokenizationOptions, lm, Location, Uri, workspace } from 'vscode';
+import { FilesContext, History, Tag, ToolCall } from '@vscode/prompt-tsx-elements';
+import { Chunk, TextChunk, ToolCall as ToolCallBase } from '@vscode/prompt-tsx/dist/base/promptElements';
+import { ChatContext, ChatParticipantToolToken, ChatPromptReference, ChatRequest, LanguageModelToolCallPart, LanguageModelToolResult, Location, Uri, workspace } from 'vscode';
 
 export interface ToolUserProps extends BasePromptElementProps {
     request: ChatRequest;
@@ -46,21 +44,16 @@ export class ToolUserPrompt extends PromptElement<ToolUserProps, void> {
                     - DO NOT CALL multi_tool_use.parallel FOR ANY REASON. This is a special tool for internal use only.<br />
                     - Today's date is {new Date().toLocaleDateString()} so keep that in mind.
                 </UserMessage>
-                {/* Give older History messages less priority and have them flexGrow last */}
-                <History
-                    context={this.props.context}
-                    start={0}
-                    end={this.props.context.history.length - 1}
-                    priority={10}
-                    flexGrow={3}
-                />
-                {/* Give the last message a higher priority than the other history messages
+                {/* Give older History messages less priority and have them flexGrow last
+                    Give the last message a higher priority than the other history messages
                     and reserve space for it to be present by not specifying flex */}
                 <History
-                    context={this.props.context}
-                    start={this.props.context.history.length - 1}
-                    end={this.props.context.history.length}
-                    priority={20}
+                    history={this.props.context.history}
+                    passPriority
+                    older={10}
+                    newer={20}
+                    flexGrow={3}
+                    n={1}
                 />
                 {/* References have a higher priority than history because we care about them more. We also use flexGrow to include
                     as much as we can before we render history. Lastly we use flexReserve to reserve some amount of budget so
@@ -95,8 +88,6 @@ interface ToolCallsProps extends BasePromptElementProps {
 	toolInvocationToken: ChatParticipantToolToken | undefined;
 }
 
-const dummyCancellationToken: CancellationToken = new CancellationTokenSource().token;
-
 class ToolCalls extends PromptElement<ToolCallsProps, void> {
 	async render(state: void, sizing: PromptSizing) {
 		if (!this.props.toolCallRounds.length) {
@@ -111,104 +102,15 @@ class ToolCalls extends PromptElement<ToolCallsProps, void> {
 	}
 
 	private renderOneToolCallRound(round: ToolCallRound) {
-		const assistantToolCalls: ToolCall[] = round.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.input) }, id: tc.callId }));
+		const assistantToolCalls: ToolCallBase[] = round.toolCalls.map(tc => ({ type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.input) }, id: tc.callId }));
 		// TODO- just need to adopt prompt-tsx update in vscode-copilot
 		return (
 			<Chunk>
 				<AssistantMessage toolCalls={assistantToolCalls}>{round.response}</AssistantMessage>
 				{round.toolCalls.map(toolCall =>
-					<ToolCallElement toolCall={toolCall} toolInvocationToken={this.props.toolInvocationToken} toolCallResult={this.props.toolCallResults[toolCall.callId]}></ToolCallElement>)}
+					<ToolCall call={toolCall} invocationToken={this.props.toolInvocationToken} result={this.props.toolCallResults[toolCall.callId]} />)}
 			</Chunk>);
 	}
-}
-
-interface ToolCallElementProps extends BasePromptElementProps {
-	toolCall: LanguageModelToolCallPart;
-	toolInvocationToken: ChatParticipantToolToken | undefined;
-	toolCallResult: LanguageModelToolResult | undefined;
-}
-
-class ToolCallElement extends PromptElement<ToolCallElementProps, void> {
-	async render(state: void, sizing: PromptSizing): Promise<PromptPiece | undefined> {
-		const tool = lm.tools.find(t => t.name === this.props.toolCall.name);
-		if (!tool) {
-			console.error(`Tool not found: ${this.props.toolCall.name}`);
-			return <ToolMessage toolCallId={this.props.toolCall.callId}>Tool not found</ToolMessage>;
-		}
-
-		const tokenizationOptions: LanguageModelToolTokenizationOptions = {
-			tokenBudget: sizing.tokenBudget,
-			countTokens: async (content: string) => sizing.countTokens(content),
-		};
-
-		const toolResult = this.props.toolCallResult ??
-			await lm.invokeTool(this.props.toolCall.name, { input: this.props.toolCall.input, toolInvocationToken: this.props.toolInvocationToken, tokenizationOptions }, dummyCancellationToken);
-		return (
-			<ToolMessage toolCallId={this.props.toolCall.callId}>
-				<meta value={new ToolResultMetadata(this.props.toolCall.callId, toolResult)}></meta>
-				<ToolResult data={toolResult} />
-			</ToolMessage>
-		);
-	}
-}
-
-export class ToolResultMetadata extends PromptMetadata {
-	constructor(
-		public toolCallId: string,
-		public result: LanguageModelToolResult,
-	) {
-		super();
-	}
-}
-
-interface HistoryProps extends BasePromptElementProps {
-    priority: number;
-    context: ChatContext;
-    start: number;
-    end: number;
-}
-
-class History extends PromptElement<HistoryProps, void> {
-    render(state: void, sizing: PromptSizing) {
-        return (
-            <PrioritizedList priority={this.props.priority} descending={false}>
-                {this.props.context.history.slice(this.props.start, this.props.end).map((message) => {
-                    if (message instanceof ChatRequestTurn) {
-                        return (
-                            <>
-                                {<PromptReferences references={message.references} />}
-                                <UserMessage>{message.prompt}</UserMessage>
-                            </>
-                        );
-                    } else if (message instanceof ChatResponseTurn) {
-                        return (
-                            <AssistantMessage>
-                                {chatResponseToString(message)}
-                            </AssistantMessage>
-                        );
-                    }
-                })}
-            </PrioritizedList>
-        );
-    }
-}
-
-function chatResponseToString(response: ChatResponseTurn): string {
-    return response.response
-        .map((r) => {
-            if (r instanceof ChatResponseMarkdownPart) {
-                return r.value.value;
-            } else if (r instanceof ChatResponseAnchorPart) {
-                if (r.value instanceof Uri) {
-                    return r.value.fsPath;
-                } else {
-                    return r.value.uri.fsPath;
-                }
-            }
-
-            return '';
-        })
-        .join('');
 }
 
 interface PromptReferencesProps extends BasePromptElementProps {
@@ -219,69 +121,14 @@ class PromptReferences extends PromptElement<PromptReferencesProps, void> {
     render(state: void, sizing: PromptSizing): PromptPiece {
         return (
             <UserMessage>
-                {this.props.references.map((ref, index) => (
-                    <PromptReference ref={ref}></PromptReference>
+                {this.props.references.map(ref => (
+                    <FilesContext files={{
+                        value: ref.value as Exclude<typeof ref.value, unknown>,
+                        // turn off expansion to avoid diluting the information being search for
+                        expand: false,
+                    }} />
                 ))}
             </UserMessage>
-        );
-    }
-}
-
-interface PromptReferenceProps extends BasePromptElementProps {
-    ref: ChatPromptReference;
-}
-
-class PromptReference extends PromptElement<PromptReferenceProps> {
-    async render(state: void, sizing: PromptSizing): Promise<PromptPiece | undefined> {
-        const value = this.props.ref.value;
-        if (value instanceof Uri) {
-            const fileContents = (await workspace.fs.readFile(value)).toString();
-            return (
-                <Tag name="context">
-                    {value.toString(true)}
-                    ``` <br />
-                    <TextChunk breakOnWhitespace>{fileContents}</TextChunk><br />
-                    ```<br />
-                </Tag>
-            );
-        } else if (value instanceof Location) {
-            const rangeText = (await workspace.openTextDocument(value.uri)).getText(value.range);
-            return (
-                <Tag name="context">
-                    {value.uri.toString(true)}:{value.range.start.line + 1}-{value.range.end.line + 1}
-                    ```<br />
-                    <TextChunk breakOnWhitespace>{rangeText}</TextChunk><br />
-                    ```
-                </Tag>
-            );
-        } else if (typeof value === 'string') {
-            return <Tag name="context">{value}</Tag>;
-        }
-    }
-}
-
-export type TagProps = PromptElementProps<{
-    name: string;
-}>;
-
-export class Tag extends PromptElement<TagProps> {
-    private static readonly _regex = /^[a-zA-Z_][\w\.\-]*$/;
-
-    render() {
-        const { name } = this.props;
-
-        if (!Tag._regex.test(name)) {
-            throw new Error(l10n.t('Invalid tag name: {0}', name));
-        }
-
-        return (
-            <>
-                {'<' + name + '>'}<br />
-                <>
-                    {this.props.children}<br />
-                </>
-                {'</' + name + '>'}<br />
-            </>
         );
     }
 }
