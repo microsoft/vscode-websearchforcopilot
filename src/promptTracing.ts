@@ -16,7 +16,7 @@ export function toggleTracing(extensionMode: ExtensionMode) {
 }
 
 export async function renderPrompt<P extends BasePromptElementProps>(endpoint: IChatEndpointInfo, ctor: PromptElementCtor<P, any>, props: P, model: LanguageModelChat, token: CancellationToken) {
-    const renderer = new PromptRenderer(endpoint, ctor, props, new AnyTokenizer(model.countTokens));
+    const renderer = new PromptRenderer(endpoint, ctor, props, new AnyTokenizer(model.countTokens, 'vscode'));
     let result: RenderPromptResult;
     if (tracingEnabled) {
         const tracer = new HTMLTracer();
