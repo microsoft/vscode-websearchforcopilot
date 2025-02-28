@@ -29,7 +29,7 @@ class WebSearchChatParticipant {
             return {
                 name: tool.name,
                 description: tool.description,
-                inputSchema: tool.inputSchema ?? {}
+                inputSchema: tool.inputSchema
             };
         });
 
