@@ -15,5 +15,7 @@ export async function findNaiveChunksBasedOnQuery(
 ) {
     const index = new WebsiteEmbeddingsNaiveChunkIndex(urls, embeddingsCache, crawl);
 
-    return await index.search(query, maxResults ?? 5, token);
+    const result = await index.search(query, maxResults ?? 5, token);
+
+    return result;
 }
