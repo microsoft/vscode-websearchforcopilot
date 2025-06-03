@@ -18,7 +18,14 @@ export async function activate(context: vscode.ExtensionContext) {
     registerChatParticipant(context);
     registerCommands(context);
 }
-
+// This method is called when your extension is deactivated
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+// export function deactivate() {}
+// This method is called when your extension is activated
+/// <reference types="vscode" />
+// <reference types="vscode-languageclient" />
+// <reference types="vscode-webview" />
+// <reference types="vscode-webview-ui-toolkit" />
 async function registerAuthProviders(context: vscode.ExtensionContext) {
     const tavilySecretStorage = new ApiKeySecretStorage('tavily.keys', context);
     await tavilySecretStorage.initialize();
