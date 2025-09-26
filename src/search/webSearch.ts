@@ -29,7 +29,7 @@ export class TavilyEngine {
 		const body: ITavilySearchOptions = {
 			api_key: session.accessToken,
 			query: query,
-			include_domains: [url ?? ''],
+			include_domains: url ? [url] : [],
 			include_answer: true,
 		};
 

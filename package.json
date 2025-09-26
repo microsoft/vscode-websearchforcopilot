@@ -3,7 +3,7 @@
 	"publisher": "ms-vscode",
 	"displayName": "Web Search for Copilot",
 	"description": "Gives access to search engines from within Copilot",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"icon": "icon.png",
 	"repository": {
 		"type": "git",
