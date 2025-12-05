@@ -28,10 +28,6 @@
 			{
 				"id": "tavily",
 				"label": "Tavily"
-			},
-			{
-				"id": "bing",
-				"label": "Bing"
 			}
 		],
 		"configuration": [
@@ -46,8 +42,7 @@
 					"websearch.preferredEngine": {
 						"type": "string",
 						"enum": [
-							"tavily",
-							"bing"
+							"tavily"
 						],
 						"default": "tavily",
 						"description": "%config.preferredEngine.description%"

@@ -14,7 +14,6 @@ import {
 	l10n,
 	window,
 } from 'vscode';
-import { BingEngine } from '../search/webSearch';
 import { ApiKeyDetails, ApiKeySecretStorage } from './secretStorage';
 
 export abstract class BaseAuthProvider implements AuthenticationProvider {
@@ -193,35 +192,4 @@ export class TavilyAuthProvider extends BaseAuthProvider {
 	}
 }
 
-export class BingAuthProvider extends BaseAuthProvider {
-	static readonly ID = 'bing';
-	static readonly NAME = 'Bing';
 
-	protected readonly name = BingAuthProvider.NAME;
-
-	protected readonly createKeyUrl = 'https://www.microsoft.com/en-us/bing/apis/bing-web-search-api';
-
-	protected async validateKey(key: string): Promise<boolean> {
-		try {
-			const req = await fetch(
-				BingEngine.BING_API_BASE_URL +
-					'/v7.0/search?q=' +
-					encodeURIComponent('testing'),
-				{
-					method: 'GET',
-					headers: {
-						'Ocp-Apim-Subscription-Key': key,
-					},
-				}
-			);
-
-			const result = (await req.json()) as any;
-			if (!req.ok) {
-				throw new Error(result.detail.error);
-			}
-			return true;
-		} catch (e: any) {
-			return false;
-		}
-	}
-}

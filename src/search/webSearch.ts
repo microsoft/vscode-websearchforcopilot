@@ -8,12 +8,7 @@ import { ITavilySearchOptions, IWebSearchResults, ITavilyExtractParameters, ITav
 
 export class SearchEngineManager {
 	static async search(query: string): Promise<IWebSearchResults> {
-		const engineChoice = vscode.workspace.getConfiguration('websearch').get<'tavily' | 'bing'>('preferredEngine');
-		if (engineChoice === 'tavily') {
-			return await TavilyEngine.search(query);
-		} else {
-			return await BingEngine.search(query);
-		}
+		return await TavilyEngine.search(query);
 	}
 }
 
@@ -71,46 +66,4 @@ export class TavilyEngine {
 	}
 }
 
-export class BingEngine {
-	static BING_API_BASE_URL = 'https://api.bing.microsoft.com';
 
-	static async search(query: string): Promise<IWebSearchResults> {
-		const session = await vscode.authentication.getSession('bing', [], {
-			createIfNone: true,
-		});
-
-		const response = await fetch(
-			BingEngine.BING_API_BASE_URL + '/v7.0/search?q=' + encodeURIComponent(query),
-			{
-				method: 'GET',
-				headers: {
-					'Ocp-Apim-Subscription-Key': session.accessToken,
-				},
-			}
-		);
-
-		const raw = await response.json();
-
-		if (raw.errors) {
-			if (raw.errors.length === 1) {
-				throw new Error(raw.errors[0].message);
-			} else {
-				throw new AggregateError(raw.errors.map((e: any) => new Error(e.message)));
-			}
-		}
-		if (raw.webPages) {
-			const result: IWebSearchResults = {
-				urls: raw.webPages.value.map((x: any) => {
-					return {
-						url: x.url,
-						title: x.name,
-						snippet: x.snippet,
-					};
-				}),
-				answer: raw.webPages.value[0].snippet,
-			};
-			return result;
-		}
-		throw new Error('Unexpected response from Bing search API');
-	}
-}
