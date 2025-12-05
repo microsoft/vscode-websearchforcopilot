@@ -13,8 +13,6 @@ Get the most up-to-date and relevant information from the web right in Copilot.
 
 This is powered by the [Tavily](http://tavily.com) search engine.
 
-You can configure this with the `websearch.preferredEngine` setting.
-
 You'll need to acquire an API key from this service to use this extension. Upon first use, it will ask you for that key and store it using VS Code's built-in secret storage, and can be managed via VS Code's authentication stack as well just as you would for your GitHub account.
 
 ### Chat Participant
@@ -43,7 +41,6 @@ API.
 
 ### Settings
 
-* `websearch.preferredEngine` - Configure the desired search engine.
 * `websearch.useSearchResultsDirectly` - Skip the post processing of search results and use raw search results from the search engine instead.
 
 ## Trademarks
