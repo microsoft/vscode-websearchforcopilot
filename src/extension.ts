@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import * as vscode from 'vscode';
-import { BingAuthProvider, TavilyAuthProvider } from './auth/authProvider';
+import { TavilyAuthProvider } from './auth/authProvider';
 import { registerChatParticipant } from './chatParticipant';
 import { WebSearchTool } from './chatTool';
 import Logger from './logger';
@@ -24,15 +24,9 @@ async function registerAuthProviders(context: vscode.ExtensionContext) {
     await tavilySecretStorage.initialize();
     const tavilyAuthProvider = new TavilyAuthProvider(tavilySecretStorage);
 
-    const bingSecretStorage = new ApiKeySecretStorage('bing.keys', context);
-    await bingSecretStorage.initialize();
-    const bingAuthProvider = new BingAuthProvider(bingSecretStorage);
-
     context.subscriptions.push(vscode.Disposable.from(
         tavilyAuthProvider,
-        vscode.authentication.registerAuthenticationProvider(TavilyAuthProvider.ID, TavilyAuthProvider.NAME, new TavilyAuthProvider(tavilySecretStorage), { supportsMultipleAccounts: true }),
-        bingAuthProvider,
-        vscode.authentication.registerAuthenticationProvider(BingAuthProvider.ID, BingAuthProvider.NAME, new BingAuthProvider(bingSecretStorage), { supportsMultipleAccounts: true })
+        vscode.authentication.registerAuthenticationProvider(TavilyAuthProvider.ID, TavilyAuthProvider.NAME, new TavilyAuthProvider(tavilySecretStorage), { supportsMultipleAccounts: true })
     ));
 }
 
