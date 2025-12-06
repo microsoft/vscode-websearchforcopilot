@@ -6,13 +6,6 @@
 import * as vscode from 'vscode';
 import { ITavilySearchOptions, IWebSearchResults, ITavilyExtractParameters, ITavilyExtractResponse } from './webSearchTypes';
 
-export class SearchEngineManager {
-	static async search(query: string): Promise<IWebSearchResults> {
-		return await TavilyEngine.search(query);
-	}
-}
-
-
 export class TavilyEngine {
 	static TAVILY_API_BASE_URL = 'https://api.tavily.com';
 

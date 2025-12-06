@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { CancellationToken, l10n, LanguageModelPromptTsxPart, LanguageModelTextPart, LanguageModelTool, LanguageModelToolInvocationOptions, LanguageModelToolInvocationPrepareOptions, LanguageModelToolResult, PreparedToolInvocation, ProviderResult, Uri, workspace } from "vscode";
-import { SearchEngineManager } from "./search/webSearch";
+import { TavilyEngine } from "./search/webSearch";
 import { findNaiveChunksBasedOnQuery } from "./webChunk/chunkSearch";
 import {
     BasePromptElementProps,
@@ -39,7 +39,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
     }
 
     async invoke(options: LanguageModelToolInvocationOptions<WebSearchToolParameters>, token: CancellationToken): Promise<LanguageModelToolResult> {
-        const results = await SearchEngineManager.search(options.input.query);
+        const results = await TavilyEngine.search(options.input.query);
 
         let chunks: FileChunk[];
         if (workspace.getConfiguration('websearch').get<boolean>('useSearchResultsDirectly')) {
