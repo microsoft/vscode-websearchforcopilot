@@ -1,53 +1,9 @@
 import tsParser from '@typescript-eslint/parser';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
+import headersPlugin from 'eslint-plugin-headers';
 
-const copyrightHeader = `/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/`;
-
-const headerPlugin = {
-	rules: {
-		header: {
-			meta: {
-				type: 'layout',
-				fixable: 'whitespace',
-				schema: [],
-			},
-			create(context) {
-				return {
-					Program(node) {
-						const sourceCode = context.sourceCode ?? context.getSourceCode?.();
-						const [firstComment] = sourceCode.getAllComments();
-						const expectedHeader = `${copyrightHeader}\n`;
-
-						if (
-							firstComment &&
-							firstComment.type === 'Block' &&
-							firstComment.range[0] === 0 &&
-							sourceCode.getText(firstComment) === copyrightHeader
-						) {
-							return;
-						}
-
-						context.report({
-							node,
-							loc: { line: 1, column: 0 },
-							message: 'Missing expected file header comment.',
-							fix(fixer) {
-								if (firstComment && firstComment.range[0] === 0) {
-									return fixer.replaceText(firstComment, copyrightHeader);
-								}
-
-								return fixer.insertTextBefore(node, expectedHeader);
-							},
-						});
-					},
-				};
-			},
-		},
-	},
-};
+const copyrightHeader = `Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License. See LICENSE in the project root for license information.`;
 
 export default [
 	{
@@ -62,7 +18,7 @@ export default [
 		},
 		plugins: {
 			'@typescript-eslint': tsEslintPlugin,
-			header: headerPlugin,
+			headers: headersPlugin,
 		},
 		rules: {
 			'@typescript-eslint/naming-convention': [
@@ -72,7 +28,13 @@ export default [
 					format: ['camelCase', 'PascalCase'],
 				},
 			],
-			'header/header': 'error',
+			'headers/header-format': ['error', {
+				source: 'string',
+				content: copyrightHeader,
+				blockPrefix: '---------------------------------------------------------------------------------------------\n',
+				linePrefix: ' *  ',
+				blockSuffix: '\n *--------------------------------------------------------------------------------------------',
+			}],
 			curly: 'warn',
 			eqeqeq: 'warn',
 			'no-throw-literal': 'warn',
