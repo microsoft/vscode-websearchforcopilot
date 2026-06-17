@@ -2,7 +2,7 @@ import tsParser from '@typescript-eslint/parser';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import headersPlugin from 'eslint-plugin-headers';
 
-const copyrightHeader = `Copyright (c) Microsoft Corporation. All rights reserved.
+const copyrightHeaderContent = `Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License. See LICENSE in the project root for license information.`;
 
 export default [
@@ -30,7 +30,7 @@ export default [
 			],
 			'headers/header-format': ['error', {
 				source: 'string',
-				content: copyrightHeader,
+				content: copyrightHeaderContent,
 				blockPrefix: '---------------------------------------------------------------------------------------------\n',
 				linePrefix: ' *  ',
 				blockSuffix: '\n *--------------------------------------------------------------------------------------------',
