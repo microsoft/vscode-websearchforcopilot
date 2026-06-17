@@ -17,7 +17,7 @@ const headerPlugin = {
 			create(context) {
 				return {
 					Program(node) {
-						const sourceCode = context.sourceCode;
+						const sourceCode = context.sourceCode ?? context.getSourceCode?.();
 						const [firstComment] = sourceCode.getAllComments();
 						const expectedHeader = `${copyrightHeader}\n`;
 
@@ -36,10 +36,10 @@ const headerPlugin = {
 							message: 'Missing expected file header comment.',
 							fix(fixer) {
 								if (firstComment && firstComment.range[0] === 0) {
-									return fixer.replaceTextRange([0, firstComment.range[1]], copyrightHeader);
+									return fixer.replaceText(firstComment, copyrightHeader);
 								}
 
-								return fixer.insertTextBeforeRange([0, 0], expectedHeader);
+								return fixer.insertTextBefore(node, expectedHeader);
 							},
 						});
 					},
