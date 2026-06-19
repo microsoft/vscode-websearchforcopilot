@@ -171,12 +171,10 @@ export class TavilyAuthProvider extends BaseAuthProvider {
 			const req = await fetch('https://api.tavily.com/search', {
 				method: 'POST',
 				headers: {
-					// eslint-disable-next-line @typescript-eslint/naming-convention
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
 					query: 'testing',
-					// eslint-disable-next-line @typescript-eslint/naming-convention
 					api_key: key,
 				}),
 			});
@@ -191,5 +189,4 @@ export class TavilyAuthProvider extends BaseAuthProvider {
 		}
 	}
 }
-
 
