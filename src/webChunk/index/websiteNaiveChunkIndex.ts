@@ -5,7 +5,7 @@
 import { Uri, CancellationToken } from "vscode";
 import { naiveChunk } from "../chunker/chunker";
 import { crawl, scrape } from "../crawler/webCrawler";
-import { FileChunk, getDocumentFromPage, ResourceMap } from "../utils";
+import { FileChunk, getDocumentFromPage, ResourceMap, sectionToString } from "../utils";
 import { EmbeddingsCache, EmbeddingsIndex, FileChunkWithScorer } from "./embeddings";
 
 const CHUNK_SIZE = 600;
@@ -43,14 +43,14 @@ export class WebsiteEmbeddingsNaiveChunkIndex {
             const docs = new Array<FileChunkWithScorer>;
             for (const page of result) {
                 const vscodeUri = Uri.parse(page.url);
-                const document = getDocumentFromPage(page);
                 const fileChunks = new Array<FileChunkWithScorer>();
 
-                const naiveChunks = naiveChunk(document, CHUNK_SIZE);
+                const naiveChunks = naiveChunk(page.sections.map(s => sectionToString(s)), CHUNK_SIZE);
                 for (const chunk of naiveChunks) {
                     fileChunks.push({
                         file: vscodeUri,
-                        text: chunk,
+                        text: chunk.result,
+                        rawText: chunk.sources,
                         scoreBonus: calculateURLBoost(i),
                     } satisfies FileChunkWithScorer);
                 }

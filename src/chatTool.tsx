@@ -86,6 +86,7 @@ export class WebSearchTool implements LanguageModelTool<WebSearchToolParameters>
             return {
                 file: this.addHighlightFragment(Uri.parse(url.url), url.snippet),
                 text: `TITLE: ${url.title}\nSNIPPET:${url.snippet}`,
+                rawText: [url.snippet ?? ''],
             };
         });
     }
