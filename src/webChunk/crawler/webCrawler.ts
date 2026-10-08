@@ -21,7 +21,7 @@ function parse(url: string, document: Document): Page {
         if (currentHeading) {
             sections.push({
                 heading: currentHeading,
-                content: currentContent.trim(),
+                content: currentContent,
             });
             currentContent = '';
         }
