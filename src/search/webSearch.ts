@@ -25,10 +25,12 @@ export class TavilyEngine {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+				'X-Client-Name': 'vscode-websearchforcopilot',
 			},
 			body: JSON.stringify(body),
 		});
 
+		await TavilyEngine.checkResponse(response);
 		const raw = await response.json();
 		const result: IWebSearchResults = {
 			urls: raw.results.map((x: any) => {
@@ -48,6 +50,7 @@ export class TavilyEngine {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+				'X-Client-Name': 'vscode-websearchforcopilot',
 			},
 			body: JSON.stringify({
 				urls: params.urls,
@@ -55,7 +58,29 @@ export class TavilyEngine {
 			}),
 		});
 
+		await TavilyEngine.checkResponse(req);
 		return (await req.json()) as ITavilyExtractResponse;
+	}
+
+	private static async checkResponse(response: Response): Promise<void> {
+		if (response.ok) {
+			return;
+		}
+
+		let detail = '';
+		try {
+			const text = await response.text();
+			try {
+				const body = JSON.parse(text);
+				const error = body?.detail ?? body?.error ?? body?.message;
+				detail = typeof error === 'string' ? error : error ? JSON.stringify(error) : '';
+			} catch {
+				detail = text;
+			}
+		} catch {
+			// Keep the HTTP status even if the error response body cannot be read.
+		}
+		throw new Error(`Tavily request failed (HTTP ${response.status})${detail ? `: ${detail}` : ''}`);
 	}
 }
 
