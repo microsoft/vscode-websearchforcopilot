@@ -109,7 +109,8 @@
 		"watch-tests": "tsc -p . -w --outDir dist",
 		"pretest": "npm run compile-tests && npm run compile && npm run lint",
 		"lint": "eslint \"src/**/*.ts\"",
-		"test": "vscode-test"
+		"test": "vscode-test",
+		"test:unit": "node --test test/webSearch.test.cjs"
 	},
 	"devDependencies": {
 		"@types/jsdom": "^21.1.7",
