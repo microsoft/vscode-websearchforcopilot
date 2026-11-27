@@ -7,6 +7,8 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
+import { EmbeddingsCache, EmbeddingsIndex } from '../webChunk/index/embeddings';
+import { ResourceMap } from '../webChunk/utils';
 // import * as myExtension from '../../extension';
 
 suite('Extension Test Suite', () => {
@@ -15,5 +17,27 @@ suite('Extension Test Suite', () => {
 	test('Sample test', () => {
 		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
 		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	});
+
+	test('Only requests missing embeddings when there are chunks to rank', async () => {
+		const file = vscode.Uri.file('guide');
+		const cache = new class extends EmbeddingsCache {
+			override async load() {}
+			override async saveCache() {}
+		}(file);
+		const requests: string[][] = [];
+		const index = new class extends EmbeddingsIndex {
+			override async getEmbeddings(text: string[]) {
+				requests.push(text);
+				return text.map(() => [1]);
+			}
+		}(cache, new ResourceMap());
+
+		assert.deepStrictEqual(await index.rankChunks('empty', [], 5), []);
+		cache.set('query', [1]);
+		const chunk = { file, text: 'guide text', scoreBonus: 0 };
+		assert.deepStrictEqual(await index.rankChunks('query', [chunk], 5), [chunk]);
+		assert.deepStrictEqual(await index.rankChunks('query', [chunk], 5), [chunk]);
+		assert.deepStrictEqual(requests, [[chunk.text]]);
 	});
 });
