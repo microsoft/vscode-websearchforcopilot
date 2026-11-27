@@ -142,6 +142,9 @@ export class EmbeddingsIndex {
     }
 
     async rankChunks(query: string, chunks: FileChunkWithScorer[], maxResults: number): Promise<FileChunkWithScorer[]> {
+        if (chunks.length === 0) {
+            return [];
+        }
 
         const cachedQuery = this.embeddingsCache.get(query);
 
@@ -161,7 +164,7 @@ export class EmbeddingsIndex {
         const stringsToFetch = cachedQuery ? [] : [query];
         stringsToFetch.push(...fileChunksWithoutCachedEmbeddings.map(chunk => chunk.text));
 
-        const embeddings = await this.getEmbeddings(stringsToFetch);
+        const embeddings = stringsToFetch.length > 0 ? await this.getEmbeddings(stringsToFetch) : [];
 
         const fileChunksWithEmbeddings: FileChunkWithEmbeddings[] = Array.from(fileChunksWithCachedEmbeddings);
         const queryEmbedding = cachedQuery ? cachedQuery : embeddings.shift() as Embedding;
